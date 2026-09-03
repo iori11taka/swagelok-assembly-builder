@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <title>Swagelok Assembly Builder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+
+    <div class="brand">
+      <div class="brand-logo">Swagelok</div>
+      <div class="brand-divider"></div>
+      <div class="brand-title">Assembly Builder</div>
+    </div>
+
+    <div class="top-actions">
+
+      <button id="newProjectBtn" type="button">
+        Nuevo
+      </button>
+
+      <button type="button" disabled>Abrir</button>
+      <button type="button" disabled>Guardar</button>
+      <button type="button" disabled>Exportar</button>
+
+      <div class="separator"></div>
+
+      <button id="undoBtn" type="button" disabled>
+        ↶ Deshacer
+      </button>
+
+      <button id="redoBtn" type="button" disabled>
+        ↷ Rehacer
+      </button>
+
+    </div>
+
+    <div class="top-right">
+      <button type="button" disabled>? Ayuda</button>
+      <button type="button" disabled>⚙ Configuración</button>
+    </div>
+
+  </header>
+
+
+  <div class="app-layout">
+
+    <aside class="sidebar">
+
+      <div class="sidebar-header">
+        <h2>Componentes</h2>
+
+        <input
+          id="componentSearch"
+          type="text"
+          placeholder="Buscar componente..."
+          autocomplete="off"
+        >
+      </div>
+
+
+      <section class="component-section">
+
+        <div class="section-title">
+          Reguladores
+        </div>
+
+        <div
+          class="component-card"
+          draggable="true"
+          data-component="regulator"
+        >
+          <div class="component-preview">
+            <img
+              src="assets/KPR1.png"
+              alt="Regulador KPR"
+            >
+          </div>
+
+          <div class="component-card-info">
+            <strong>Regulador KPR</strong>
+            <span>Puertos 1/4" FNPT</span>
+          </div>
+        </div>
+
+      </section>
+
+
+      <section class="component-section">
+
+        <div class="section-title">
+          Instrumentación
+        </div>
+
+        <div
+          class="component-card"
+          draggable="true"
+          data-component="gauge"
+        >
+          <div class="component-preview">
+            <img
+              src="assets/PGI.png"
+              alt="Manómetro PGI"
+            >
+          </div>
+
+          <div class="component-card-info">
+            <strong>Manómetro PGI</strong>
+            <span>1/4" MNPT</span>
+          </div>
+        </div>
+
+      </section>
+
+
+      <section class="component-section">
+
+        <div class="section-title">
+          Conectores
+        </div>
+
+        <div
+          class="component-card"
+          draggable="true"
+          data-component="adapter400"
+        >
+          <div class="component-preview connector-preview">
+            <img
+              src="assets/400-1-4.png"
+              alt="400-1-4"
+            >
+          </div>
+
+          <div class="component-card-info">
+            <strong>400-1-4</strong>
+            <span>1/4" MNPT × 1/4" OD</span>
+          </div>
+        </div>
+
+
+        <div
+          class="component-card"
+          draggable="true"
+          data-component="union400"
+        >
+          <div class="component-preview connector-preview">
+            <img
+              src="assets/SS-400-6.png"
+              alt="SS-400-6"
+            >
+          </div>
+
+          <div class="component-card-info">
+            <strong>SS-400-6</strong>
+            <span>Unión recta · 1/4" OD × 1/4" OD</span>
+          </div>
+        </div>
+
+      
+
+        <div
+          class="component-card"
+          draggable="true"
+          data-component="unionTee400"
+        >
+
+          <div class="component-preview connector-preview">
+
+            <img
+              src="assets/SS-400-3.png"
+              alt="SS-400-3"
+            >
+
+          </div>
+
+          <div class="component-card-info">
+
+            <strong>
+              SS-400-3
+            </strong>
+
+            <span>
+              Unión tee · 1/4" OD
+            </span>
+
+            <span>
+              3 vías Tube fitting
+            </span>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <section class="component-section">
+
+        <div class="section-title">
+          Válvulas
+        </div>
+
+        <div
+          class="component-card"
+          draggable="true"
+          data-component="needleValve"
+        >
+          <div class="component-preview valve-preview">
+            <img
+              src="assets/SS-1RS4 C2.png"
+              alt="SS-1RS4"
+            >
+          </div>
+
+          <div class="component-card-info">
+            <strong>SS-1RS4</strong>
+            <span>Válvula de aguja · 1/4" OD</span>
+            <span>Cv 0,37 · C1 / C2</span>
+          </div>
+        </div>
+
+      
+
+        <div
+          class="component-card"
+          draggable="true"
+          data-component="ballValve"
+        >
+
+          <div class="component-preview valve-preview">
+
+            <img
+              src="assets/SS-43GS4 C2.png"
+              alt="SS-43GS4"
+            >
+
+          </div>
+
+          <div class="component-card-info">
+
+            <strong>
+              SS-43GS4
+            </strong>
+
+            <span>
+              Válvula de bola · 1/4" OD
+            </span>
+
+            <span>
+              C1 / C2
+            </span>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <div class="sidebar-help">
+
+        <strong>Tubing</strong>
+
+        <p>
+          Selecciona el tipo de tubing y luego dos Tube Fittings compatibles.
+        </p>
+
+        <p>
+          Recto libre conecta directamente ambos puntos. Los modos 45° y 90° generan dobleces controlados.
+        </p>
+
+        <p>
+          Arrastra el regulador para mover el ensamble completo. Shift + arrastrar mueve todo desde cualquier pieza.
+        </p>
+
+      </div>
+
+    </aside>
+
+
+    <main class="workspace-wrapper">
+
+      <div class="floating-toolbar">
+
+        <button
+          id="selectToolBtn"
+          class="tool active"
+          type="button"
+        >
+          ↖ Seleccionar
+        </button>
+
+        <button
+          class="tool"
+          type="button"
+          disabled
+        >
+          ⛓ Conectar
+        </button>
+
+        <div class="tubing-tool-group">
+
+          <button
+            id="tubingToolBtn"
+            class="tool"
+            type="button"
+          >
+            ╱ Tubing
+          </button>
+
+          <div
+            id="tubingMenu"
+            class="tubing-menu"
+            hidden
+          >
+
+            <button
+              type="button"
+              data-tube-shape="straight"
+              class="active"
+            >
+              ╱ Recto libre
+            </button>
+
+            <button
+              type="button"
+              data-tube-shape="45"
+            >
+              ⟋ Doblado 45°
+            </button>
+
+            <button
+              type="button"
+              data-tube-shape="90"
+            >
+              └ Doblado 90°
+            </button>
+
+          </div>
+
+        </div>
+
+        <button class="tool" type="button" disabled>
+          Texto
+        </button>
+
+        <button
+          id="rotateBtn"
+          class="tool"
+          type="button"
+        >
+          ↻ Rotar
+        </button>
+
+        <button
+          id="deleteBtn"
+          class="tool danger"
+          type="button"
+        >
+          🗑 Eliminar
+        </button>
+
+      </div>
+
+
+      <div class="zoom-box">
+
+        <button id="zoomOut" type="button">
+          −
+        </button>
+
+        <span id="zoomValue">
+          100%
+        </span>
+
+        <button id="zoomIn" type="button">
+          +
+        </button>
+
+      </div>
+
+
+      <div
+        id="workspace"
+        class="workspace"
+      >
+        <div
+          id="assemblyCanvas"
+          class="assembly-canvas"
+        ></div>
+      </div>
+
+
+      <aside
+        id="propertiesPanel"
+        class="properties-panel hidden"
+        aria-live="polite"
+      >
+
+        <div class="properties-header">
+
+          <div>
+            <span class="properties-eyebrow">
+              Selección
+            </span>
+
+            <h3 id="propertiesTitle">
+              Propiedades
+            </h3>
+          </div>
+
+          <button
+            id="closePropertiesBtn"
+            class="properties-close"
+            type="button"
+            aria-label="Cerrar propiedades"
+          >
+            ×
+          </button>
+
+        </div>
+
+        <div
+          id="propertiesBody"
+          class="properties-body"
+        ></div>
+
+      </aside>
+
+
+      <div class="workspace-hint">
+
+        <span class="hint-dot"></span>
+
+        <span id="hintText">
+          Arrastra un componente hacia una conexión compatible
+        </span>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <footer class="bottom-bar">
+
+    <div class="project-info">
+      Proyecto:
+      <strong>Ensamble nuevo</strong>
+    </div>
+
+    <div class="bottom-controls">
+
+      <label>
+        <input
+          id="gridToggle"
+          type="checkbox"
+          checked
+        >
+        Rejilla
+      </label>
+
+      <label>
+        <input
+          id="snapToggle"
+          type="checkbox"
+          checked
+        >
+        Ajuste (Snap)
+      </label>
+
+    </div>
+
+  </footer>
+
+  <script src="app.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,1174 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  color: #172033;
+  background: #eef2f6;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed !important;
+}
+
+/* HEADER */
+.topbar {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 22px;
+  color: white;
+  background: linear-gradient(90deg, #075ca6, #004682);
+  position: relative;
+  z-index: 1000;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  white-space: nowrap;
+}
+
+.brand-logo {
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 29px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.brand-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.top-actions {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.topbar button {
+  min-height: 38px;
+  padding: 0 11px;
+  border: none;
+  border-radius: 7px;
+  color: white;
+  background: transparent;
+  cursor: pointer;
+}
+
+.topbar button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.separator {
+  width: 1px;
+  height: 26px;
+  margin: 0 7px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* LAYOUT */
+.app-layout {
+  display: flex;
+  height: calc(100vh - 118px);
+  min-height: 0;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 310px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  background: #f8fafc;
+  border-right: 1px solid #dfe5ec;
+}
+
+.sidebar-header {
+  padding: 20px 18px;
+  border-bottom: 1px solid #e3e8ef;
+}
+
+.sidebar-header h2 {
+  margin: 0 0 15px;
+  font-size: 18px;
+}
+
+.sidebar-header input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #cfd7e1;
+  border-radius: 8px;
+  outline: none;
+  background: white;
+}
+
+.sidebar-header input:focus {
+  border-color: #0872c9;
+  box-shadow: 0 0 0 3px rgba(8, 114, 201, 0.12);
+}
+
+/* LIBRARY */
+.component-section {
+  padding: 17px 16px;
+  border-bottom: 1px solid #e4e9ef;
+}
+
+.section-title {
+  margin-bottom: 13px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.component-card {
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #dce3ea;
+  border-radius: 10px;
+  cursor: grab;
+  user-select: none;
+  transition: .15s ease;
+}
+
+.component-card:hover {
+  border-color: #1682d4;
+  box-shadow: 0 4px 14px rgba(0, 68, 121, 0.10);
+  transform: translateY(-1px);
+}
+
+.component-preview {
+  width: 73px;
+  height: 73px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.component-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.connector-preview {
+  width: 92px;
+}
+
+.connector-preview img {
+  width: 92px;
+  height: 65px;
+}
+
+.component-card-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.component-card-info strong {
+  font-size: 14px;
+}
+
+.component-card-info span {
+  color: #59687a;
+  font-size: 12px;
+}
+
+.sidebar-help {
+  margin: 18px 16px;
+  padding: 14px;
+  color: #526276;
+  background: #eef6fd;
+  border: 1px solid #d7eafa;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.sidebar-help strong {
+  color: #145b93;
+}
+
+.sidebar-help p {
+  margin: 6px 0 0;
+}
+
+/* WORKSPACE */
+.workspace-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  background: #edf1f5;
+}
+
+.workspace {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: #ffffff;
+
+  --grid-minor: 20px;
+  --grid-major: 100px;
+  --grid-x: 0px;
+  --grid-y: 0px;
+
+  background-image:
+    linear-gradient(#edf1f5 1px, transparent 1px),
+    linear-gradient(90deg, #edf1f5 1px, transparent 1px),
+    linear-gradient(#dbe2e9 1px, transparent 1px),
+    linear-gradient(90deg, #dbe2e9 1px, transparent 1px);
+
+  background-size:
+    var(--grid-minor) var(--grid-minor),
+    var(--grid-minor) var(--grid-minor),
+    var(--grid-major) var(--grid-major),
+    var(--grid-major) var(--grid-major);
+
+  background-position:
+    var(--grid-x) var(--grid-y),
+    var(--grid-x) var(--grid-y),
+    var(--grid-x) var(--grid-y),
+    var(--grid-x) var(--grid-y);
+
+  overscroll-behavior: none;
+}
+
+.workspace.grid-off {
+  background-image: none;
+}
+
+/* CANVAS */
+.assembly-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  /*
+    El mundo no tiene un ancho/alto útil finito.
+    Sus hijos pueden ocupar coordenadas positivas
+    o negativas y la cámara decide qué parte vemos.
+  */
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+
+  transform-origin: 0 0;
+  background: transparent;
+}
+
+/* TUBING SVG */
+.tubing-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  z-index: 8;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.tube-group {
+  fill: none;
+  pointer-events: none;
+}
+
+.tube-hitbox {
+  fill: none !important;
+  stroke: transparent;
+  stroke-width: 34px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.tube-outer {
+  fill: none !important;
+  stroke: #4d555c;
+  stroke-width: 18px;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.tube-body {
+  fill: none !important;
+  stroke: #919ba3;
+  stroke-width: 14px;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.tube-reflection {
+  fill: none !important;
+  stroke: #c8d0d5;
+  stroke-width: 7px;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.tube-shine {
+  fill: none !important;
+  stroke: #edf1f3;
+  stroke-width: 2px;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.tube-group.selected .tube-outer {
+  stroke-width: 20px;
+}
+
+/* TOOLBAR */
+.floating-toolbar {
+  position: absolute;
+  z-index: 500;
+  top: 20px;
+  left: 26px;
+  display: flex;
+  gap: 4px;
+  padding: 7px;
+  background: white;
+  border: 1px solid #dfe5eb;
+  border-radius: 10px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.10);
+}
+
+.tool {
+  min-height: 38px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 7px;
+  color: #334155;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tool.active {
+  color: #0068bd;
+  background: #e8f3fd;
+}
+
+.tool:not(:disabled):hover {
+  background: #f0f5f9;
+}
+
+.tool.danger:not(:disabled):hover {
+  color: #b42318;
+  background: #fff0ee;
+}
+
+/* TUBING MENU */
+.tubing-tool-group {
+  position: relative;
+}
+
+.tubing-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 180px;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid #dce3ea;
+  border-radius: 9px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  z-index: 1000;
+}
+
+.tubing-menu[hidden] {
+  display: none;
+}
+
+.tubing-menu button {
+  width: 100%;
+  padding: 10px 11px;
+  text-align: left;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+}
+
+.tubing-menu button:hover {
+  background: #edf6fd;
+  color: #0068bd;
+}
+
+.tubing-menu button.active {
+  background: #e3f1fc;
+  color: #0068bd;
+  font-weight: 600;
+}
+
+/* ZOOM */
+.zoom-box {
+  position: absolute;
+  z-index: 500;
+  top: 20px;
+  right: 20px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px;
+  background: white;
+  border: 1px solid #dbe2e8;
+  border-radius: 9px;
+}
+
+.zoom-box button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: #f2f5f8;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+#zoomValue {
+  min-width: 50px;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* COMPONENTS */
+.canvas-component {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transform-origin: center center;
+}
+
+.canvas-component.regulator {
+  width: 230px;
+  height: 230px;
+  z-index: 50;
+}
+
+/*
+  El manómetro debe quedar visualmente por delante del regulador.
+  Su insertionDepth controla cuánto entra la conexión roscada.
+*/
+.canvas-component.gauge {
+  width: 175px;
+  height: 225px;
+  z-index: 30;
+}
+
+/*
+  Los adaptadores NPT quedan por detrás del cuerpo del regulador.
+  Así la parte insertada de la rosca desaparece dentro del puerto.
+*/
+.canvas-component.adapter400 {
+  width: 170px;
+  height: 77px;
+  z-index: 30;
+}
+
+.canvas-component.dragging {
+  z-index: 90;
+}
+
+/*
+  No bajar todos los componentes conectados a una misma capa.
+  Cada familia conserva su profundidad visual definida arriba.
+*/
+.canvas-component.connected.regulator {
+  z-index: 40;
+}
+
+.canvas-component.connected.gauge {
+  z-index: 50;
+}
+
+.canvas-component.connected.adapter400 {
+  z-index: 30;
+}
+
+.component-visual {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.component-visual img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* SELECTION */
+.selection-box {
+  position: absolute;
+  inset: -7px;
+  z-index: 150;
+  display: none;
+  border: 1.5px dashed #1384da;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.canvas-component.selected .selection-box {
+  display: block;
+}
+
+/* PORTS */
+.connection-port {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  z-index: 160;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #1687dc;
+  box-shadow: 0 0 0 2px #1687dc;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.canvas-component.selected .connection-port,
+.canvas-component.dragging .connection-port {
+  opacity: 1;
+}
+
+.connection-port.occupied {
+  background: #22a367;
+  box-shadow: 0 0 0 2px #22a367;
+}
+
+.connection-port.snap-target {
+  opacity: 1;
+  background: #f59e0b;
+}
+
+.assembly-canvas.tubing-mode
+.connection-port.tube-fitting-port:not(.occupied) {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+.connection-port.tube-start {
+  opacity: 1 !important;
+  background: #f59e0b !important;
+  transform: translate(-50%, -50%) scale(1.35);
+}
+
+/* SNAP GUIDE */
+.snap-guide {
+  position: absolute;
+  z-index: 250;
+  display: none;
+  padding: 7px 10px;
+  color: white;
+  background: #0879ce;
+  border-radius: 7px;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.snap-guide.visible {
+  display: block;
+}
+
+/* HINT */
+.workspace-hint {
+  position: absolute;
+  z-index: 500;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 15px;
+  color: #526174;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #dce3ea;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.hint-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #1989dd;
+}
+
+/* FOOTER */
+.bottom-bar {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  background: white;
+  border-top: 1px solid #dfe5eb;
+}
+
+.project-info {
+  font-size: 13px;
+}
+
+.project-info strong {
+  color: #075eaa;
+}
+
+.bottom-controls {
+  display: flex;
+  gap: 28px;
+}
+
+.bottom-controls label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+}
+
+.bottom-controls input {
+  accent-color: #0879d1;
+}
+
+
+/* =========================================================
+   PROPERTIES PANEL
+========================================================= */
+
+.properties-panel {
+  position: absolute;
+  z-index: 480;
+  top: 82px;
+  right: 20px;
+  width: 300px;
+  max-height: calc(100% - 150px);
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #dbe3eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(15, 36, 58, 0.16);
+  backdrop-filter: blur(8px);
+}
+
+.properties-panel.hidden {
+  display: none;
+}
+
+.properties-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 13px;
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid #e5ebf1;
+}
+
+.properties-eyebrow {
+  display: block;
+  margin-bottom: 3px;
+  color: #6a7a8d;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.properties-header h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 16px;
+}
+
+.properties-close {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  color: #526174;
+  background: #f2f5f8;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.properties-close:hover {
+  color: #0b69ad;
+  background: #e9f3fb;
+}
+
+.properties-body {
+  padding: 14px 16px 16px;
+}
+
+.property-block + .property-block {
+  margin-top: 16px;
+}
+
+.property-label {
+  margin-bottom: 7px;
+  color: #6a7a8d;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.property-value {
+  color: #25364a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.property-port-list {
+  display: grid;
+  gap: 7px;
+}
+
+.property-port {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 9px 10px;
+  background: #f7f9fb;
+  border: 1px solid #e3e8ee;
+  border-radius: 8px;
+}
+
+.property-port-main {
+  min-width: 0;
+}
+
+.property-port-name {
+  display: block;
+  margin-bottom: 2px;
+  color: #27384b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.property-port-type {
+  color: #657589;
+  font-size: 11px;
+}
+
+.port-status {
+  align-self: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.port-status.free {
+  color: #087949;
+  background: #e9f8f1;
+}
+
+.port-status.used {
+  color: #8a5600;
+  background: #fff4d8;
+}
+
+.property-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.property-btn {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #cfd9e4;
+  border-radius: 7px;
+  color: #334155;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.property-btn:hover {
+  border-color: #1384da;
+  color: #086cb4;
+  background: #f2f9fe;
+}
+
+.property-btn.active {
+  color: white;
+  border-color: #0879ce;
+  background: #0879ce;
+}
+
+.property-btn.danger:hover {
+  color: #b42318;
+  border-color: #efb7b0;
+  background: #fff3f1;
+}
+
+.tube-group.selected .tube-body {
+  stroke: #7ea9c7;
+}
+
+.tube-group.selected .tube-shine {
+  stroke: #ffffff;
+}
+
+.topbar #undoBtn:not(:disabled),
+.topbar #redoBtn:not(:disabled) {
+  opacity: 1;
+}
+
+@media (max-width: 1100px) {
+  .properties-panel {
+    width: 270px;
+    right: 12px;
+  }
+}
+
+
+/* =========================================================
+   PHYSICAL STACKING - FINAL OVERRIDE
+   El cuerpo del regulador debe ocultar las partes roscadas
+   de manómetros y conectores que penetran en sus puertos.
+========================================================= */
+
+.canvas-component.regulator {
+  z-index: 60 !important;
+}
+
+.canvas-component.gauge,
+.canvas-component.adapter400 {
+  z-index: 30 !important;
+}
+
+/* Una pieza conectada NO debe saltar por delante del KPR. */
+.canvas-component.gauge.connected,
+.canvas-component.adapter400.connected {
+  z-index: 30 !important;
+}
+
+.canvas-component.regulator.connected {
+  z-index: 60 !important;
+}
+
+/* Mientras el usuario arrastra una pieza sí la ponemos delante
+   temporalmente para facilitar la interacción. */
+.canvas-component.gauge.dragging,
+.canvas-component.adapter400.dragging,
+.canvas-component.regulator.dragging {
+  z-index: 90 !important;
+}
+
+/* El tubing permanece debajo de los componentes. */
+.tubing-layer {
+  z-index: 8 !important;
+}
+
+
+
+
+/* Atajo de movimiento de ensamble */
+.sidebar-help kbd {
+  padding: 1px 5px;
+  border: 1px solid #c9d4df;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: #ffffff;
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   TUBE LEG CONTROLS
+========================================================= */
+
+.tube-leg-control {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.tube-leg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: #526276;
+}
+
+.tube-leg-header strong {
+  color: #172033;
+  font-size: 12px;
+}
+
+.tube-leg-control input[type="range"] {
+  width: 100%;
+  accent-color: #0879d1;
+  cursor: ew-resize;
+}
+
+.tube-reset-legs {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.property-btn.secondary {
+  background: #f3f6f9;
+  color: #334155;
+}
+
+.property-btn.secondary:hover {
+  background: #e8eef4;
+}
+
+
+/* =========================================================
+   COMPONENT LIBRARY SPACING
+========================================================= */
+
+.component-card + .component-card {
+  margin-top: 12px;
+}
+
+.valve-preview {
+  width: 78px;
+  height: 78px;
+}
+
+.valve-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+/* =========================================================
+   SS-400-6 / SS-1RS4
+========================================================= */
+
+.canvas-component.union400 {
+  width: 190px;
+  height: 82px;
+  z-index: 30;
+}
+
+.canvas-component.needleValve {
+  z-index: 30;
+}
+
+
+/* View buttons */
+.view-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.view-selector .property-btn {
+  justify-content: center;
+}
+
+
+/* =========================================================
+   PHYSICAL STACKING EXTENSION
+========================================================= */
+
+.canvas-component.union400,
+.canvas-component.needleValve {
+  z-index: 30 !important;
+}
+
+.canvas-component.union400.connected,
+.canvas-component.needleValve.connected {
+  z-index: 30 !important;
+}
+
+.canvas-component.union400.dragging,
+.canvas-component.needleValve.dragging {
+  z-index: 90 !important;
+}
+
+
+/* =========================================================
+   PORT ALIGNMENT GUIDE
+========================================================= */
+
+.port-alignment-guide {
+  position: absolute;
+  z-index: 240;
+  pointer-events: none;
+  border-top: 1px dashed #1687dc;
+  opacity: 0.75;
+}
+
+
+/* =========================================================
+   WORKSPACE PANNING
+========================================================= */
+
+/*
+  Espacio presionado: el usuario está listo
+  para desplazar el lienzo.
+*/
+body.pan-ready .workspace,
+body.pan-ready .assembly-canvas {
+  cursor: grab !important;
+}
+
+body.pan-ready .canvas-component {
+  cursor: grab !important;
+}
+
+/*
+  Durante el paneo real.
+*/
+.workspace.is-panning,
+.workspace.is-panning .assembly-canvas,
+.workspace.is-panning .canvas-component {
+  cursor: grabbing !important;
+}
+
+.workspace.is-panning {
+  user-select: none;
+}
+
+/*
+  Durante el paneo usamos pointer capture; no desactivamos
+  el canvas completo para no bloquear los puertos de tubing.
+*/
+
+
+/* =========================================================
+   TUBING PORT INTERACTION SAFETY
+========================================================= */
+
+.assembly-canvas.tubing-mode
+.connection-port.tube-fitting-port:not(.occupied) {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  cursor: crosshair !important;
+  z-index: 500 !important;
+}
+
+
+/* =========================================================
+   SS-43GS4 BALL VALVE
+========================================================= */
+
+.canvas-component.ballValve {
+  z-index: 30 !important;
+}
+
+.canvas-component.ballValve.connected {
+  z-index: 30 !important;
+}
+
+.canvas-component.ballValve.dragging {
+  z-index: 90 !important;
+}
+
+/*
+  Las dos válvulas usan el mismo preview compacto
+  dentro de la biblioteca lateral.
+*/
+.valve-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+/* =========================================================
+   SS-400-3 UNION TEE
+========================================================= */
+
+.canvas-component.unionTee400 {
+  width: 220px;
+  height: 147px;
+  z-index: 30 !important;
+}
+
+.canvas-component.unionTee400.connected {
+  z-index: 30 !important;
+}
+
+.canvas-component.unionTee400.dragging {
+  z-index: 90 !important;
+}
+
+
+/* =========================================================
+   INFINITE CANVAS
+========================================================= */
+
+.workspace {
+  overflow: hidden !important;
+}
+
+.assembly-canvas {
+  width: 1px !important;
+  height: 1px !important;
+  overflow: visible !important;
+}
+
+.tubing-layer {
+  width: 1px !important;
+  height: 1px !important;
+  overflow: visible !important;
+}
