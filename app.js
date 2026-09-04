@@ -748,6 +748,348 @@ workspace.addEventListener("drop", event => {
   }
 });
 
+
+/* =========================================================
+   TOUCH / TABLET DRAG FROM COMPONENT LIBRARY
+========================================================= */
+
+/*
+  HTML5 Drag & Drop funciona bien con mouse, pero no es
+  consistente en iOS/Android. Para touch/pen usamos
+  Pointer Events y un "ghost" visual independiente.
+*/
+
+let libraryTouchDrag = null;
+
+
+function createLibraryDragGhost(
+  card
+) {
+  const ghost =
+    document.createElement(
+      "div"
+    );
+
+  ghost.className =
+    "library-drag-ghost";
+
+  const image =
+    card.querySelector(
+      "img"
+    );
+
+  const name =
+    card.querySelector(
+      "strong"
+    );
+
+  if (image) {
+    const ghostImage =
+      image.cloneNode(
+        true
+      );
+
+    ghost.appendChild(
+      ghostImage
+    );
+  }
+
+  if (name) {
+    const label =
+      document.createElement(
+        "span"
+      );
+
+    label.textContent =
+      name.textContent.trim();
+
+    ghost.appendChild(
+      label
+    );
+  }
+
+  document.body.appendChild(
+    ghost
+  );
+
+  return ghost;
+}
+
+
+function positionLibraryDragGhost(
+  clientX,
+  clientY
+) {
+  if (
+    !libraryTouchDrag ||
+    !libraryTouchDrag.ghost
+  ) {
+    return;
+  }
+
+  libraryTouchDrag.ghost.style.left =
+    `${clientX}px`;
+
+  libraryTouchDrag.ghost.style.top =
+    `${clientY}px`;
+}
+
+
+function isPointInsideWorkspace(
+  clientX,
+  clientY
+) {
+  const rect =
+    workspace.getBoundingClientRect();
+
+  return (
+    clientX >= rect.left &&
+    clientX <= rect.right &&
+    clientY >= rect.top &&
+    clientY <= rect.bottom
+  );
+}
+
+
+function cancelLibraryTouchDrag() {
+  if (!libraryTouchDrag) {
+    return;
+  }
+
+  if (
+    libraryTouchDrag.ghost
+  ) {
+    libraryTouchDrag.ghost.remove();
+  }
+
+  document.body.classList.remove(
+    "library-touch-dragging"
+  );
+
+  workspace.classList.remove(
+    "touch-drop-target"
+  );
+
+  libraryTouchDrag =
+    null;
+}
+
+
+document
+  .querySelectorAll(
+    ".component-card"
+  )
+  .forEach(card => {
+
+    card.addEventListener(
+      "pointerdown",
+      event => {
+
+        /*
+          Mouse sigue usando el drag/drop original.
+          Solo interceptamos touch o stylus.
+        */
+        if (
+          event.pointerType !==
+            "touch" &&
+          event.pointerType !==
+            "pen"
+        ) {
+          return;
+        }
+
+        if (
+          event.button !==
+          0
+        ) {
+          return;
+        }
+
+        const type =
+          card.dataset.component;
+
+        if (!type) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const ghost =
+          createLibraryDragGhost(
+            card
+          );
+
+        libraryTouchDrag = {
+          pointerId:
+            event.pointerId,
+
+          type:
+            type,
+
+          ghost:
+            ghost,
+
+          startX:
+            event.clientX,
+
+          startY:
+            event.clientY
+        };
+
+        positionLibraryDragGhost(
+          event.clientX,
+          event.clientY
+        );
+
+        document.body.classList.add(
+          "library-touch-dragging"
+        );
+
+        try {
+          card.setPointerCapture(
+            event.pointerId
+          );
+        }
+        catch (error) {}
+
+      },
+      {
+        passive:
+          false
+      }
+    );
+
+  });
+
+
+document.addEventListener(
+  "pointermove",
+  event => {
+
+    if (
+      !libraryTouchDrag ||
+      event.pointerId !==
+        libraryTouchDrag.pointerId
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    positionLibraryDragGhost(
+      event.clientX,
+      event.clientY
+    );
+
+    workspace.classList.toggle(
+      "touch-drop-target",
+      isPointInsideWorkspace(
+        event.clientX,
+        event.clientY
+      )
+    );
+
+  },
+  {
+    passive:
+      false
+  }
+);
+
+
+document.addEventListener(
+  "pointerup",
+  event => {
+
+    if (
+      !libraryTouchDrag ||
+      event.pointerId !==
+        libraryTouchDrag.pointerId
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const type =
+      libraryTouchDrag.type;
+
+    const canDrop =
+      isPointInsideWorkspace(
+        event.clientX,
+        event.clientY
+      );
+
+    if (canDrop) {
+      setTool(
+        "select"
+      );
+
+      const point =
+        screenToCanvas(
+          event.clientX,
+          event.clientY
+        );
+
+      const component =
+        createComponent(
+          type,
+          point.x,
+          point.y
+        );
+
+      if (
+        component &&
+        type !==
+          "regulator" &&
+        snapToggle.checked
+      ) {
+        trySnapComponent(
+          component,
+          true
+        );
+      }
+
+      showHint(
+        "Componente colocado"
+      );
+
+      queueMicrotask(
+        () => {
+          commitHistory();
+          renderPropertiesPanel();
+        }
+      );
+    }
+
+    cancelLibraryTouchDrag();
+
+  },
+  {
+    passive:
+      false
+  }
+);
+
+
+document.addEventListener(
+  "pointercancel",
+  event => {
+
+    if (
+      !libraryTouchDrag ||
+      event.pointerId !==
+        libraryTouchDrag.pointerId
+    ) {
+      return;
+    }
+
+    cancelLibraryTouchDrag();
+
+  }
+);
+
 selectToolBtn.addEventListener("click", () => setTool("select"));
 
 tubingToolBtn.addEventListener("click", event => {
