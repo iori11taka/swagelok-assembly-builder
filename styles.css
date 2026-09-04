@@ -1288,3 +1288,24 @@ body.library-touch-dragging {
     cursor: grab;
   }
 }
+
+
+/* =========================================================
+   TABLET / MOBILE CANVAS GESTURES
+========================================================= */
+
+.workspace {
+  touch-action: none;
+}
+
+.workspace.is-touch-panning,
+.workspace.is-touch-pinching {
+  cursor: grabbing;
+}
+
+@media (pointer: coarse) {
+  .workspace {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}

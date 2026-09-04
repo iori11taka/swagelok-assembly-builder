@@ -38,6 +38,18 @@ let isSpacePressed = false;
 let panPointerId = null;
 let panStartClientX = 0;
 let panStartClientY = 0;
+let touchGesturePointers = new Map();
+let touchGestureMode = null;
+let touchGestureStartDistance = 0;
+let touchGestureStartZoom = 1;
+let touchGestureStartCameraX = 0;
+let touchGestureStartCameraY = 0;
+let touchGestureStartMidpoint = null;
+let touchPanPointerId = null;
+let touchPanStartX = 0;
+let touchPanStartY = 0;
+let touchPanStartCameraX = 0;
+let touchPanStartCameraY = 0;
 let panStartCameraX = 0;
 let panStartCameraY = 0;
 let tubingStart = null;
@@ -1443,6 +1455,271 @@ function updateCameraTransform() {
     `${Math.round(zoom * 100)}%`;
 }
 
+
+
+/* =========================================================
+   TABLET / MOBILE CANVAS GESTURES
+========================================================= */
+
+function getTouchGestureMidpoint() {
+  const points = Array.from(touchGesturePointers.values());
+
+  if (points.length < 2) {
+    return null;
+  }
+
+  return {
+    x: (points[0].clientX + points[1].clientX) / 2,
+    y: (points[0].clientY + points[1].clientY) / 2
+  };
+}
+
+function getTouchGestureDistance() {
+  const points = Array.from(touchGesturePointers.values());
+
+  if (points.length < 2) {
+    return 0;
+  }
+
+  return Math.hypot(
+    points[1].clientX - points[0].clientX,
+    points[1].clientY - points[0].clientY
+  );
+}
+
+function isInteractiveGestureTarget(target) {
+  return !!target.closest(
+    ".component-card, .canvas-component, .connection-port, .tube-group, button, input, .properties-panel, .floating-toolbar, .zoom-box, .sidebar"
+  );
+}
+
+function beginSingleFingerCanvasPan(event) {
+  if (
+    event.pointerType !== "touch" ||
+    event.button !== 0 ||
+    isInteractiveGestureTarget(event.target) ||
+    currentTool !== "select"
+  ) {
+    return false;
+  }
+
+  touchGestureMode = "pan";
+  touchPanPointerId = event.pointerId;
+  touchPanStartX = event.clientX;
+  touchPanStartY = event.clientY;
+  touchPanStartCameraX = cameraX;
+  touchPanStartCameraY = cameraY;
+
+  workspace.classList.add("is-touch-panning");
+
+  try {
+    workspace.setPointerCapture(event.pointerId);
+  } catch (error) {}
+
+  event.preventDefault();
+  return true;
+}
+
+function updateSingleFingerCanvasPan(event) {
+  if (
+    touchGestureMode !== "pan" ||
+    event.pointerId !== touchPanPointerId
+  ) {
+    return;
+  }
+
+  cameraX =
+    touchPanStartCameraX +
+    (event.clientX - touchPanStartX);
+
+  cameraY =
+    touchPanStartCameraY +
+    (event.clientY - touchPanStartY);
+
+  updateCameraTransform();
+  event.preventDefault();
+}
+
+function endSingleFingerCanvasPan(event = null) {
+  if (
+    touchGestureMode !== "pan" ||
+    (
+      event &&
+      event.pointerId !== touchPanPointerId
+    )
+  ) {
+    return;
+  }
+
+  touchGestureMode = null;
+  touchPanPointerId = null;
+  workspace.classList.remove("is-touch-panning");
+}
+
+function beginPinchZoom() {
+  if (touchGesturePointers.size < 2) {
+    return;
+  }
+
+  const midpoint = getTouchGestureMidpoint();
+
+  if (!midpoint) {
+    return;
+  }
+
+  touchGestureMode = "pinch";
+  touchGestureStartDistance = getTouchGestureDistance();
+  touchGestureStartZoom = zoom;
+  touchGestureStartCameraX = cameraX;
+  touchGestureStartCameraY = cameraY;
+  touchGestureStartMidpoint = midpoint;
+
+  workspace.classList.add("is-touch-pinching");
+}
+
+function updatePinchZoom() {
+  if (
+    touchGestureMode !== "pinch" ||
+    touchGesturePointers.size < 2
+  ) {
+    return;
+  }
+
+  const midpoint = getTouchGestureMidpoint();
+  const distance = getTouchGestureDistance();
+
+  if (!midpoint || !touchGestureStartDistance) {
+    return;
+  }
+
+  const newZoom = Math.max(
+    0.25,
+    Math.min(
+      4,
+      touchGestureStartZoom *
+      (distance / touchGestureStartDistance)
+    )
+  );
+
+  const rect = workspace.getBoundingClientRect();
+
+  const worldX =
+    (
+      touchGestureStartMidpoint.x -
+      rect.left -
+      touchGestureStartCameraX
+    ) /
+    touchGestureStartZoom;
+
+  const worldY =
+    (
+      touchGestureStartMidpoint.y -
+      rect.top -
+      touchGestureStartCameraY
+    ) /
+    touchGestureStartZoom;
+
+  zoom = newZoom;
+
+  cameraX =
+    midpoint.x -
+    rect.left -
+    worldX * zoom;
+
+  cameraY =
+    midpoint.y -
+    rect.top -
+    worldY * zoom;
+
+  updateCameraTransform();
+}
+
+function endPinchZoom() {
+  touchGestureMode = null;
+  touchGestureStartMidpoint = null;
+  workspace.classList.remove("is-touch-pinching");
+}
+
+workspace.addEventListener(
+  "pointerdown",
+  event => {
+    if (event.pointerType !== "touch") {
+      return;
+    }
+
+    touchGesturePointers.set(
+      event.pointerId,
+      {
+        clientX: event.clientX,
+        clientY: event.clientY
+      }
+    );
+
+    if (touchGesturePointers.size === 1) {
+      beginSingleFingerCanvasPan(event);
+    }
+    else if (touchGesturePointers.size === 2) {
+      endSingleFingerCanvasPan();
+      beginPinchZoom();
+      event.preventDefault();
+    }
+  },
+  { passive: false }
+);
+
+workspace.addEventListener(
+  "pointermove",
+  event => {
+    if (
+      event.pointerType !== "touch" ||
+      !touchGesturePointers.has(event.pointerId)
+    ) {
+      return;
+    }
+
+    touchGesturePointers.set(
+      event.pointerId,
+      {
+        clientX: event.clientX,
+        clientY: event.clientY
+      }
+    );
+
+    if (touchGestureMode === "pinch") {
+      updatePinchZoom();
+      event.preventDefault();
+      return;
+    }
+
+    updateSingleFingerCanvasPan(event);
+  },
+  { passive: false }
+);
+
+function finishTouchGesturePointer(event) {
+  if (event.pointerType !== "touch") {
+    return;
+  }
+
+  touchGesturePointers.delete(event.pointerId);
+
+  if (
+    touchGestureMode === "pinch" &&
+    touchGesturePointers.size < 2
+  ) {
+    endPinchZoom();
+  }
+
+  if (
+    touchGestureMode === "pan" &&
+    event.pointerId === touchPanPointerId
+  ) {
+    endSingleFingerCanvasPan(event);
+  }
+}
+
+workspace.addEventListener("pointerup", finishTouchGesturePointer);
+workspace.addEventListener("pointercancel", finishTouchGesturePointer);
 
 function setTool(tool) {
   currentTool = tool;
