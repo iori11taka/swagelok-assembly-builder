@@ -1235,7 +1235,8 @@ body.pan-ready .canvas-component {
       0.22
     );
 
-  pointer-events: none;
+  pointer-events: none !important;
+  touch-action: none;
 }
 
 .library-drag-ghost img {

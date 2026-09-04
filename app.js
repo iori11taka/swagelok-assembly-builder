@@ -852,15 +852,29 @@ function isPointInsideWorkspace(
 
 
 function cancelLibraryTouchDrag() {
-  if (!libraryTouchDrag) {
-    return;
-  }
-
+  /*
+    Eliminamos el ghost registrado...
+  */
   if (
+    libraryTouchDrag &&
     libraryTouchDrag.ghost
   ) {
     libraryTouchDrag.ghost.remove();
   }
+
+  /*
+    ...y además cualquier ghost huérfano que pudiera
+    quedar por un pointerup capturado por otro elemento.
+  */
+  document
+    .querySelectorAll(
+      ".library-drag-ghost"
+    )
+    .forEach(
+      ghost => {
+        ghost.remove();
+      }
+    );
 
   document.body.classList.remove(
     "library-touch-dragging"
@@ -1011,64 +1025,97 @@ document.addEventListener(
     }
 
     event.preventDefault();
+    event.stopPropagation();
 
-    const type =
-      libraryTouchDrag.type;
+    /*
+      Guardamos los datos antes del finally, porque
+      cancelLibraryTouchDrag() vacía libraryTouchDrag.
+    */
+    const dragData = {
+      type:
+        libraryTouchDrag.type,
 
-    const canDrop =
-      isPointInsideWorkspace(
+      clientX:
         event.clientX,
+
+      clientY:
         event.clientY
-      );
+    };
 
-    if (canDrop) {
-      setTool(
-        "select"
-      );
-
-      const point =
-        screenToCanvas(
-          event.clientX,
-          event.clientY
+    try {
+      const canDrop =
+        isPointInsideWorkspace(
+          dragData.clientX,
+          dragData.clientY
         );
 
-      const component =
-        createComponent(
-          type,
-          point.x,
-          point.y
+      if (canDrop) {
+        setTool(
+          "select"
         );
 
-      if (
-        component &&
-        type !==
-          "regulator" &&
-        snapToggle.checked
-      ) {
-        trySnapComponent(
-          component,
-          true
+        const point =
+          screenToCanvas(
+            dragData.clientX,
+            dragData.clientY
+          );
+
+        const component =
+          createComponent(
+            dragData.type,
+            point.x,
+            point.y
+          );
+
+        if (
+          component &&
+          dragData.type !==
+            "regulator" &&
+          snapToggle.checked
+        ) {
+          trySnapComponent(
+            component,
+            true
+          );
+        }
+
+        showHint(
+          "Componente colocado"
+        );
+
+        /*
+          El historial se actualiza después de colocar/snapear,
+          pero el ghost ya no depende de que esto termine bien.
+        */
+        queueMicrotask(
+          () => {
+            commitHistory();
+            renderPropertiesPanel();
+          }
         );
       }
-
-      showHint(
-        "Componente colocado"
-      );
-
-      queueMicrotask(
-        () => {
-          commitHistory();
-          renderPropertiesPanel();
-        }
-      );
     }
 
-    cancelLibraryTouchDrag();
+    finally {
+      /*
+        CRÍTICO EN TOUCH:
+        el ghost desaparece SIEMPRE aunque ocurra un error,
+        snap automático o captura de eventos.
+      */
+      cancelLibraryTouchDrag();
+    }
 
   },
   {
     passive:
-      false
+      false,
+
+    /*
+      Capture phase: recibimos pointerup antes que canvas,
+      componentes o puertos puedan detener la propagación.
+    */
+    capture:
+      true
   }
 );
 
@@ -1087,8 +1134,49 @@ document.addEventListener(
 
     cancelLibraryTouchDrag();
 
+  },
+  {
+    capture:
+      true
   }
 );
+
+
+function touchGhostSafetyCleanup() {
+  if (
+    libraryTouchDrag ||
+    document.querySelector(
+      ".library-drag-ghost"
+    )
+  ) {
+    cancelLibraryTouchDrag();
+  }
+}
+
+
+/*
+  Casos frecuentes en tablets:
+  - cambia el foco del navegador
+  - aparece teclado / multitarea
+  - el sistema cancela el pointer
+  Cualquiera de ellos debe limpiar el ghost.
+*/
+window.addEventListener(
+  "blur",
+  touchGhostSafetyCleanup
+);
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (
+      document.hidden
+    ) {
+      touchGhostSafetyCleanup();
+    }
+  }
+);
+
 
 selectToolBtn.addEventListener("click", () => setTool("select"));
 
