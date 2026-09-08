@@ -1,59 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-  <title>Swagelok Assembly Builder</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-
-<body>
-
-  <header class="topbar">
-
-    <div class="brand">
-      <div class="brand-logo">Swagelok</div>
-      <div class="brand-divider"></div>
-      <div class="brand-title">Assembly Builder</div>
-    </div>
-
-    <div class="top-actions">
-
-      <button id="newProjectBtn" type="button">
-        Nuevo
-      </button>
-
-      <button type="button" disabled>Abrir</button>
-      <button type="button" disabled>Guardar</button>
-      <button type="button" disabled>Exportar</button>
-
-      <div class="separator"></div>
-
-      <button id="undoBtn" type="button" disabled>
-        ↶ Deshacer
-      </button>
-
-      <button id="redoBtn" type="button" disabled>
-        ↷ Rehacer
-      </button>
-
-    </div>
-
-    <div class="top-right">
-      <button type="button" disabled>? Ayuda</button>
-      <button type="button" disabled>⚙ Configuración</button>
-    </div>
-
-  </header>
-
-
-  <div class="app-layout">
-
-    <aside class="sidebar">
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#142f40"><meta name="description" content="Configura conjuntos con reguladores, válvulas, instrumentos y tubos. Taller de ensamblaje visual."><title>Taller · Assembly Builder</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="workshop.css"></head><body>
+<header class="topbar"><a class="brand" href="./"><span class="brand-mark">⌘</span><span class="brand-logo">taller</span><span class="brand-divider"></span><span class="brand-title">ENSAMBLAJE<br>SWAGELOK</span></a><span class="header-caption">Tu espacio de ingeniería</span><div class="top-actions"><button id="openProjectsBtn">Mis proyectos</button><button class="primary" id="createProjectBtn">＋ Nuevo proyecto</button></div></header>
+<div class="project-heading"><div><div class="eyebrow">CONFIGURADOR DE CONJUNTOS</div><h1 id="projectName">Mi conjunto</h1><p>Tus componentes. Tu diseño. Cada conexión en su lugar.</p></div><div class="project-heading-actions"><span id="storageStatus" role="status">Guardado en este dispositivo</span><button id="renameProjectBtn">Editar proyecto ↗</button></div></div>
+<nav class="workshop-tabs" aria-label="Vistas del conjunto"><button data-screen="design" class="active">01 <span>Diseñar conjunto</span></button><button data-screen="materials">02 <span>Lista de materiales</span><b id="materialCount">0</b></button><button data-screen="guide">03 <span>Guía del taller</span></button></nav>
+<div id="designScreen" class="app-layout"><aside class="sidebar">
 
       <div class="sidebar-header">
         <h2>Componentes</h2>
@@ -283,12 +232,9 @@
 
       </div>
 
-    </aside>
+    </aside><section class="workspace-wrapper"><div class="canvas-topline"><span><i></i> Mesa de trabajo <small>/ Vista de piezas</small></span><button id="fitViewBtn" type="button">Centrar conjunto</button></div>
 
-
-    <main class="workspace-wrapper">
-
-      <div class="floating-toolbar">
+      <div class="floating-toolbar"><button id="undoBtn" class="tool" disabled aria-label="Deshacer">↶</button><button id="redoBtn" class="tool" disabled aria-label="Rehacer">↷</button>
 
         <button
           id="selectToolBtn"
@@ -298,13 +244,7 @@
           ↖ Seleccionar
         </button>
 
-        <button
-          class="tool"
-          type="button"
-          disabled
-        >
-          ⛓ Conectar
-        </button>
+        
 
         <div class="tubing-tool-group">
 
@@ -348,9 +288,7 @@
 
         </div>
 
-        <button class="tool" type="button" disabled>
-          Texto
-        </button>
+        
 
         <button
           id="rotateBtn"
@@ -399,7 +337,20 @@
       </div>
 
 
-      <aside
+      
+
+
+      <div class="workspace-hint">
+
+        <span class="hint-dot"></span>
+
+        <span id="hintText">
+          Arrastra un componente hacia una conexión compatible
+        </span>
+
+      </div>
+
+    </section><div class="detail-column"><div class="detail-heading"><h2>Detalle de la pieza</h2><label>Seleccionar en el conjunto<select id="piecePicker"><option>Sin piezas</option></select></label></div><div id="detailEmpty"><span>↖</span><h3>Todo empieza con una pieza</h3><p>Añade un componente de la biblioteca o selecciónalo en la mesa de trabajo.</p></div><aside
         id="propertiesPanel"
         class="properties-panel hidden"
         aria-live="polite"
@@ -433,57 +384,9 @@
           class="properties-body"
         ></div>
 
-      </aside>
-
-
-      <div class="workspace-hint">
-
-        <span class="hint-dot"></span>
-
-        <span id="hintText">
-          Arrastra un componente hacia una conexión compatible
-        </span>
-
-      </div>
-
-    </main>
-
-  </div>
-
-
-  <footer class="bottom-bar">
-
-    <div class="project-info">
-      Proyecto:
-      <strong>Ensamble nuevo</strong>
-    </div>
-
-    <div class="bottom-controls">
-
-      <label>
-        <input
-          id="gridToggle"
-          type="checkbox"
-          checked
-        >
-        Rejilla
-      </label>
-
-      <label>
-        <input
-          id="snapToggle"
-          type="checkbox"
-          checked
-        >
-        Ajuste (Snap)
-      </label>
-
-    </div>
-
-  </footer>
-
-  <script src="app.js"></script>
-
-</body>
-
-</html>
+      </aside><div class="assembly-summary"><div class="eyebrow">ESTADO DEL CONJUNTO</div><h3 id="summaryPieces">0 piezas en tu diseño</h3><p id="summaryConnections">Añade el primer componente.</p><button id="showMaterialsBtn">Ver lista de materiales →</button></div></div></div>
+<section id="materialsScreen" class="content-screen" hidden><div class="screen-heading"><div><h2>Lista de materiales</h2><p>Componentes y tramos de tubo del conjunto actual.</p></div><button id="downloadCsvBtn" class="primary">↓ Exportar CSV</button><button id="printMaterialsBtn">Imprimir / PDF</button></div><div class="table-scroll"><table><thead><tr><th>Componente</th><th>Referencia / familia</th><th>Detalle</th><th>Cantidad</th></tr></thead><tbody id="materialsBody"></tbody></table></div><p class="technical-note">KPR y PGI identifican familias, no referencias completas de compra. Las longitudes del esquema son visuales; confirma longitudes, espesores y referencias antes de pedir materiales.</p></section>
+<section id="guideScreen" class="content-screen" hidden><div class="screen-heading"><div><h2>De la biblioteca al conjunto</h2><p>Un espacio para trabajar con mouse, teclado o pantalla táctil.</p></div></div><div class="guide-grid"><article><b>01</b><h3>Añade y posiciona</h3><p>Pulsa ＋ en la biblioteca para añadir una pieza al centro. También puedes arrastrarla. Usa el selector de piezas para encontrarla.</p></article><article><b>02</b><h3>Conecta las roscas</h3><p>Acerca un puerto roscado a otro compatible con el ajuste activado. Las conexiones NPT necesitan tamaño coincidente y extremos macho y hembra.</p></article><article><b>03</b><h3>Traza el tubo</h3><p>Selecciona Tubing y una geometría: recta, 45° o 90°. Después selecciona dos puertos Tube Fitting disponibles. Puedes usar los botones del panel de detalle.</p></article><article><b>04</b><h3>Revisa y conserva</h3><p>Consulta materiales, guarda tus proyectos y exporta una copia JSON para abrirla en otro dispositivo. Los proyectos se guardan en este navegador.</p></article></div><div class="technical-note">Herramienta independiente de planificación. Las imágenes, posiciones de puertos y datos de componentes provienen de tu catálogo de trabajo. El esquema no certifica aptitud para presión, temperatura o fluido. <a href="https://www.swagelok.com/en/blog/how-to-perform-tube-fitting-installation" target="_blank" rel="noopener">Consultar instrucciones oficiales de montaje ↗</a></div></section>
+<footer class="bottom-bar"><div class="bottom-controls"><label><input id="gridToggle" type="checkbox" checked> Rejilla</label><label><input id="snapToggle" type="checkbox" checked> Ajustar conexiones</label></div><span id="canvasStats">0 piezas · 0 tubos</span><div class="footer-actions"><button id="saveProjectBtn">Guardar</button><button id="exportProjectBtn">↓ Exportar proyecto</button><button id="importProjectBtn">↑ Importar</button></div></footer>
+<button id="newProjectBtn" hidden></button><input id="projectFile" type="file" accept=".json,application/json" hidden><dialog id="projectDialog"><form id="projectDialogForm"><div class="dialog-heading"><h2 id="dialogTitle">Proyecto</h2><button id="closeProjectDialog" type="button" aria-label="Cerrar">×</button></div><div id="dialogBody"></div><div id="dialogActions"></div></form></dialog><div id="workshopToast" role="status" aria-live="polite"></div>
+<script src="project-data.js"></script><script src="app.js"></script><script src="workshop.js"></script></body></html>

@@ -1,0 +1,1 @@
+{"name":"taller-ensamblaje-visual","version":"2.0.0","private":true,"description":"Adaptación visual del Swagelok Assembly Builder","scripts":{"start":"node server.cjs"},"engines":{"node":">=20"}}
