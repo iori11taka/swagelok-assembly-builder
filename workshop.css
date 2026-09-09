@@ -237,3 +237,44 @@
     margin-bottom: 10px;
   }
 }
+
+
+/* =========================================================
+   PROJECT HEADER REMOVED
+   La vista de diseño empieza directamente después del topbar.
+   Los elementos de estado se conservan ocultos porque workshop.js
+   los utiliza internamente para guardado y edición.
+========================================================= */
+.project-runtime-state {
+  display: none !important;
+}
+
+.project-compact-bar,
+.project-heading {
+  display: none !important;
+}
+
+.workshop-tabs {
+  margin-top: 0 !important;
+  padding-top: 4px;
+  margin-bottom: 14px;
+}
+
+.app-layout {
+  height: calc(100dvh - 166px);
+  min-height: 650px;
+}
+
+@media (max-width: 1000px) {
+  .app-layout {
+    height: auto;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 650px) {
+  .workshop-tabs {
+    padding-top: 2px;
+    margin-bottom: 10px;
+  }
+}

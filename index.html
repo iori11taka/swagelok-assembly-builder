@@ -22,16 +22,10 @@
     <button class="primary" id="createProjectBtn">＋ Nuevo proyecto</button>
   </div>
 </header>
-<div class="project-compact-bar">
-  <div class="project-compact-main">
-    <span class="project-compact-label">Proyecto</span>
-    <strong id="projectName">Mi conjunto</strong>
-  </div>
-
-  <div class="project-compact-actions">
-    <span id="storageStatus" role="status">Guardado en este dispositivo</span>
-    <button id="renameProjectBtn" type="button">Editar ↗</button>
-  </div>
+<div class="project-runtime-state" hidden aria-hidden="true">
+  <span id="projectName">Mi conjunto</span>
+  <span id="storageStatus" role="status">Guardado en este dispositivo</span>
+  <button id="renameProjectBtn" type="button" tabindex="-1">Editar</button>
 </div>
 <nav class="workshop-tabs" aria-label="Vistas del conjunto"><button data-screen="design" class="active">01 <span>Diseñar conjunto</span></button><button data-screen="materials">02 <span>Lista de materiales</span><b id="materialCount">0</b></button><button data-screen="guide">03 <span>Guía del taller</span></button></nav>
 <div id="designScreen" class="app-layout"><aside class="sidebar">
