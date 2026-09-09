@@ -4655,7 +4655,7 @@ function renderPropertiesPanel() {
                 <input
                   type="range"
                   min="36"
-                  max="260"
+                  max="600"
                   step="5"
                   value="${Number(tube.legA ?? 50)}"
                   data-tube-leg="A"
@@ -4671,7 +4671,7 @@ function renderPropertiesPanel() {
                 <input
                   type="range"
                   min="36"
-                  max="260"
+                  max="600"
                   step="5"
                   value="${Number(tube.legB ?? 50)}"
                   data-tube-leg="B"
