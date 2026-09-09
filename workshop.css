@@ -100,3 +100,140 @@
     min-height: 42px;
   }
 }
+
+
+/* =========================================================
+   COMPACT PROJECT HEADER
+   Sustituye el bloque grande "Mi conjunto" por una barra
+   mínima para priorizar el área de ensamblaje.
+========================================================= */
+
+.project-compact-bar {
+  max-width: 1836px;
+  margin: 0 32px;
+  min-height: 48px;
+  padding: 8px 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.project-compact-main {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.project-compact-label {
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+
+.project-compact-main strong {
+  font-family: Manrope, sans-serif;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-compact-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.project-compact-actions span {
+  color: #4f7968;
+  font-size: .75rem;
+  white-space: nowrap;
+}
+
+.project-compact-actions button {
+  min-height: 34px;
+  padding: 6px 11px;
+  font-size: .75rem;
+}
+
+/* Las pestañas quedan inmediatamente debajo del proyecto. */
+.workshop-tabs {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+/* Recuperamos altura útil para la mesa de trabajo. */
+.app-layout {
+  height: calc(100dvh - 220px);
+  min-height: 650px;
+}
+
+/* Ya no usamos la antigua cabecera grande. */
+.project-heading {
+  display: none !important;
+}
+
+@media (min-width: 1900px) {
+  .project-compact-bar {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 1250px) {
+  .project-compact-bar {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .app-layout {
+    height: auto;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 650px) {
+  .project-compact-bar {
+    margin: 0 14px;
+    min-height: 44px;
+    padding: 6px 0;
+    gap: 8px;
+  }
+
+  .project-compact-label {
+    display: none;
+  }
+
+  .project-compact-main strong {
+    font-size: .9rem;
+    max-width: 140px;
+  }
+
+  .project-compact-actions {
+    gap: 6px;
+  }
+
+  .project-compact-actions span {
+    display: none;
+  }
+
+  .project-compact-actions button {
+    min-height: 32px;
+    padding: 5px 9px;
+    font-size: .7rem;
+  }
+
+  .workshop-tabs {
+    margin-bottom: 10px;
+  }
+}

@@ -22,7 +22,17 @@
     <button class="primary" id="createProjectBtn">＋ Nuevo proyecto</button>
   </div>
 </header>
-<div class="project-heading"><div><div class="eyebrow">CONFIGURADOR DE CONJUNTOS</div><h1 id="projectName">Mi conjunto</h1><p>Tus componentes. Tu diseño. Cada conexión en su lugar.</p></div><div class="project-heading-actions"><span id="storageStatus" role="status">Guardado en este dispositivo</span><button id="renameProjectBtn">Editar proyecto ↗</button></div></div>
+<div class="project-compact-bar">
+  <div class="project-compact-main">
+    <span class="project-compact-label">Proyecto</span>
+    <strong id="projectName">Mi conjunto</strong>
+  </div>
+
+  <div class="project-compact-actions">
+    <span id="storageStatus" role="status">Guardado en este dispositivo</span>
+    <button id="renameProjectBtn" type="button">Editar ↗</button>
+  </div>
+</div>
 <nav class="workshop-tabs" aria-label="Vistas del conjunto"><button data-screen="design" class="active">01 <span>Diseñar conjunto</span></button><button data-screen="materials">02 <span>Lista de materiales</span><b id="materialCount">0</b></button><button data-screen="guide">03 <span>Guía del taller</span></button></nav>
 <div id="designScreen" class="app-layout"><aside class="sidebar">
 
