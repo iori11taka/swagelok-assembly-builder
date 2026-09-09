@@ -50,3 +50,53 @@
     font-size: .75rem;
   }
 }
+
+
+/* =========================================================
+   ZOOM CONTROL — POSITION FIX
+   Mantener completamente dentro de la mesa de trabajo.
+========================================================= */
+
+.workspace-wrapper > .zoom-box {
+  top: 66px;
+  right: 14px;
+  bottom: auto;
+  left: auto;
+
+  width: auto;
+  height: 44px;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px 6px;
+  gap: 6px;
+
+  box-sizing: border-box;
+  z-index: 40;
+}
+
+.workspace-wrapper > .zoom-box button {
+  flex: 0 0 32px;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+}
+
+.workspace-wrapper > .zoom-box #zoomValue {
+  flex: 0 0 46px;
+  min-width: 46px;
+}
+
+@media (max-width: 650px) {
+  .workspace-wrapper > .zoom-box {
+    top: 62px;
+    right: 8px;
+    height: 42px;
+    min-height: 42px;
+  }
+}
