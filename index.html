@@ -1,5 +1,27 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#142f40"><meta name="description" content="Configura conjuntos con reguladores, válvulas, instrumentos y tubos. Taller de ensamblaje visual."><title>Taller · Assembly Builder</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="workshop.css"></head><body>
-<header class="topbar"><a class="brand" href="./"><span class="brand-mark">⌘</span><span class="brand-logo">taller</span><span class="brand-divider"></span><span class="brand-title">ENSAMBLAJE<br>SWAGELOK</span></a><span class="header-caption">Tu espacio de ingeniería</span><div class="top-actions"><button id="openProjectsBtn">Mis proyectos</button><button class="primary" id="createProjectBtn">＋ Nuevo proyecto</button></div></header>
+<header class="topbar">
+  <a class="brand" href="./">
+    <span class="brand-mark">⌘</span>
+    <span class="brand-logo">taller</span>
+    <span class="brand-divider"></span>
+    <span class="brand-title">ENSAMBLAJE<br>SWAGELOK</span>
+  </a>
+
+  <span class="header-caption">Tu espacio de ingeniería</span>
+
+  <div class="top-actions">
+    <a
+      class="portal-return-btn"
+      href="https://iori11taka.github.io/swagelok-tools-portal/"
+      aria-label="Regresar al portal"
+    >
+      ← Portal
+    </a>
+
+    <button id="openProjectsBtn">Mis proyectos</button>
+    <button class="primary" id="createProjectBtn">＋ Nuevo proyecto</button>
+  </div>
+</header>
 <div class="project-heading"><div><div class="eyebrow">CONFIGURADOR DE CONJUNTOS</div><h1 id="projectName">Mi conjunto</h1><p>Tus componentes. Tu diseño. Cada conexión en su lugar.</p></div><div class="project-heading-actions"><span id="storageStatus" role="status">Guardado en este dispositivo</span><button id="renameProjectBtn">Editar proyecto ↗</button></div></div>
 <nav class="workshop-tabs" aria-label="Vistas del conjunto"><button data-screen="design" class="active">01 <span>Diseñar conjunto</span></button><button data-screen="materials">02 <span>Lista de materiales</span><b id="materialCount">0</b></button><button data-screen="guide">03 <span>Guía del taller</span></button></nav>
 <div id="designScreen" class="app-layout"><aside class="sidebar">
