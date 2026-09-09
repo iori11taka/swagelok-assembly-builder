@@ -24,6 +24,7 @@ const closePropertiesBtn = document.getElementById("closePropertiesBtn");
 
 let selectedComponent = null;
 let selectedTubeId = null;
+let tubeBendDrag = null;
 let draggingComponent = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
@@ -2400,6 +2401,11 @@ function createTubing(componentA, portA, componentB, portB) {
     group.appendChild(path);
   });
 
+  appendTubeBendControls(
+    group,
+    id
+  );
+
   group.addEventListener("pointerdown", event => {
     if (currentTool !== "select") return;
 
@@ -2469,6 +2475,12 @@ function updateTubing() {
     group.querySelectorAll("path").forEach(path => {
       path.setAttribute("d", pathData);
     });
+
+    updateTubeBendHandle(
+      tube,
+      group,
+      geometry
+    );
   });
 }
 
@@ -2618,6 +2630,236 @@ function build45TubePoints(
   ];
 }
 
+function get90TubeRouteData(
+  start,
+  directionA,
+  end,
+  directionB,
+  size,
+  tube
+) {
+  const rules =
+    TUBING_RULES[size] ||
+    TUBING_RULES["1/4"];
+
+  const leadAValue =
+    Math.max(
+      rules.bendRadius + 8,
+      Number(
+        tube?.legA ??
+        rules.leadLength
+      )
+    );
+
+  const leadBValue =
+    Math.max(
+      rules.bendRadius + 8,
+      Number(
+        tube?.legB ??
+        rules.leadLength
+      )
+    );
+
+  const dirA =
+    snapDirectionTo90(
+      directionA
+    );
+
+  const dirB =
+    snapDirectionTo90(
+      directionB
+    );
+
+  const vectorA =
+    directionVector(
+      dirA
+    );
+
+  const vectorB =
+    directionVector(
+      dirB
+    );
+
+  const leadA = {
+    x:
+      start.x +
+      vectorA.x *
+      leadAValue,
+
+    y:
+      start.y +
+      vectorA.y *
+      leadAValue
+  };
+
+  const leadB = {
+    x:
+      end.x +
+      vectorB.x *
+      leadBValue,
+
+    y:
+      end.y +
+      vectorB.y *
+      leadBValue
+  };
+
+  /*
+    RUTA MANUAL:
+    El usuario mueve un punto azul. Para conservar
+    geometría ortogonal, ese punto controla un eje:
+      - X cuando el primer puerto sale horizontal.
+      - Y cuando el primer puerto sale vertical.
+
+    Así se puede llevar el tubo por izquierda/derecha
+    o arriba/abajo sin desconectar sus extremos.
+  */
+
+  if (
+    isHorizontalDirection(
+      dirA
+    )
+  ) {
+    const defaultBendX =
+      isHorizontalDirection(
+        dirB
+      )
+        ? (
+            leadA.x +
+            leadB.x
+          ) / 2
+        : leadB.x;
+
+    const bendX =
+      Number.isFinite(
+        Number(
+          tube?.bendX
+        )
+      )
+        ? Number(
+            tube.bendX
+          )
+        : defaultBendX;
+
+    const pointA = {
+      x:
+        bendX,
+
+      y:
+        leadA.y
+    };
+
+    const pointB = {
+      x:
+        bendX,
+
+      y:
+        leadB.y
+    };
+
+    return {
+      axis:
+        "x",
+
+      value:
+        bendX,
+
+      leadA,
+      leadB,
+
+      handle: {
+        x:
+          bendX,
+
+        y:
+          (
+            leadA.y +
+            leadB.y
+          ) / 2
+      },
+
+      points: [
+        start,
+        leadA,
+        pointA,
+        pointB,
+        leadB,
+        end
+      ]
+    };
+  }
+
+
+  const defaultBendY =
+    isVerticalDirection(
+      dirB
+    )
+      ? (
+          leadA.y +
+          leadB.y
+        ) / 2
+      : leadB.y;
+
+  const bendY =
+    Number.isFinite(
+      Number(
+        tube?.bendY
+      )
+    )
+      ? Number(
+          tube.bendY
+        )
+      : defaultBendY;
+
+  const pointA = {
+    x:
+      leadA.x,
+
+    y:
+      bendY
+  };
+
+  const pointB = {
+    x:
+      leadB.x,
+
+    y:
+      bendY
+  };
+
+  return {
+    axis:
+      "y",
+
+    value:
+      bendY,
+
+    leadA,
+    leadB,
+
+    handle: {
+      x:
+        (
+          leadA.x +
+          leadB.x
+        ) / 2,
+
+      y:
+        bendY
+    },
+
+    points: [
+      start,
+      leadA,
+      pointA,
+      pointB,
+      leadB,
+      end
+    ]
+  };
+}
+
+
 function build90TubePoints(
   start,
   directionA,
@@ -2626,83 +2868,337 @@ function build90TubePoints(
   size,
   tube
 ) {
-  const rules = TUBING_RULES[size] || TUBING_RULES["1/4"];
-
-  const leadAValue = Math.max(
-    rules.bendRadius + 8,
-    Number(tube?.legA ?? rules.leadLength)
-  );
-
-  const leadBValue = Math.max(
-    rules.bendRadius + 8,
-    Number(tube?.legB ?? rules.leadLength)
-  );
-
-  const dirA = snapDirectionTo90(directionA);
-  const dirB = snapDirectionTo90(directionB);
-
-  const vectorA = directionVector(dirA);
-  const vectorB = directionVector(dirB);
-
-  const leadA = {
-    x: start.x + vectorA.x * leadAValue,
-    y: start.y + vectorA.y * leadAValue
-  };
-
-  const leadB = {
-    x: end.x + vectorB.x * leadBValue,
-    y: end.y + vectorB.y * leadBValue
-  };
-
-  if (
-    isHorizontalDirection(dirA) &&
-    isHorizontalDirection(dirB)
-  ) {
-    const middleX = (leadA.x + leadB.x) / 2;
-
-    return [
-      start,
-      leadA,
-      { x: middleX, y: leadA.y },
-      { x: middleX, y: leadB.y },
-      leadB,
-      end
-    ];
-  }
-
-  if (
-    isVerticalDirection(dirA) &&
-    isVerticalDirection(dirB)
-  ) {
-    const middleY = (leadA.y + leadB.y) / 2;
-
-    return [
-      start,
-      leadA,
-      { x: leadA.x, y: middleY },
-      { x: leadB.x, y: middleY },
-      leadB,
-      end
-    ];
-  }
-
-  if (isHorizontalDirection(dirA)) {
-    return [
-      start,
-      leadA,
-      { x: leadB.x, y: leadA.y },
-      leadB,
-      end
-    ];
-  }
-
-  return [
+  return get90TubeRouteData(
     start,
-    leadA,
-    { x: leadA.x, y: leadB.y },
-    leadB,
-    end
-  ];
+    directionA,
+    end,
+    directionB,
+    size,
+    tube
+  ).points;
+}
+
+
+function appendTubeBendControls(
+  group,
+  tubeId
+) {
+  const hitbox =
+    document.createElementNS(
+      SVG_NS,
+      "circle"
+    );
+
+  hitbox.classList.add(
+    "tube-bend-handle-hitbox"
+  );
+
+  hitbox.setAttribute(
+    "r",
+    "25"
+  );
+
+  hitbox.dataset.tubeId =
+    tubeId;
+
+  hitbox.addEventListener(
+    "pointerdown",
+    event => {
+      startTubeBendDrag(
+        event,
+        tubeId
+      );
+    }
+  );
+
+  const handle =
+    document.createElementNS(
+      SVG_NS,
+      "circle"
+    );
+
+  handle.classList.add(
+    "tube-bend-handle"
+  );
+
+  handle.setAttribute(
+    "r",
+    "10"
+  );
+
+  group.appendChild(
+    hitbox
+  );
+
+  group.appendChild(
+    handle
+  );
+}
+
+
+function updateTubeBendHandle(
+  tube,
+  group,
+  geometry
+) {
+  const handle =
+    group.querySelector(
+      ".tube-bend-handle"
+    );
+
+  const hitbox =
+    group.querySelector(
+      ".tube-bend-handle-hitbox"
+    );
+
+  if (
+    !handle ||
+    !hitbox
+  ) {
+    return;
+  }
+
+  const visible =
+    tube.shape === "90" &&
+    selectedTubeId ===
+      tube.id;
+
+  handle.classList.toggle(
+    "visible",
+    visible
+  );
+
+  hitbox.classList.toggle(
+    "visible",
+    visible
+  );
+
+  if (!visible) {
+    return;
+  }
+
+  const route =
+    get90TubeRouteData(
+      geometry.start,
+      geometry.directionA,
+      geometry.end,
+      geometry.directionB,
+      tube.size,
+      tube
+    );
+
+  [
+    handle,
+    hitbox
+  ].forEach(
+    element => {
+      element.setAttribute(
+        "cx",
+        route.handle.x
+      );
+
+      element.setAttribute(
+        "cy",
+        route.handle.y
+      );
+    }
+  );
+}
+
+
+function startTubeBendDrag(
+  event,
+  tubeId
+) {
+  if (
+    currentTool !==
+    "select"
+  ) {
+    return;
+  }
+
+  const tube =
+    getTubeById(
+      tubeId
+    );
+
+  if (
+    !tube ||
+    tube.shape !==
+      "90"
+  ) {
+    return;
+  }
+
+  const geometry =
+    getTubeGeometry(
+      tube
+    );
+
+  if (!geometry) {
+    return;
+  }
+
+  const route =
+    get90TubeRouteData(
+      geometry.start,
+      geometry.directionA,
+      geometry.end,
+      geometry.directionB,
+      tube.size,
+      tube
+    );
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  selectComponent(
+    null
+  );
+
+  selectTube(
+    tubeId
+  );
+
+  tubeBendDrag = {
+    pointerId:
+      event.pointerId,
+
+    tubeId:
+      tubeId,
+
+    axis:
+      route.axis
+  };
+
+  document.body.classList.add(
+    "tube-route-dragging"
+  );
+
+  try {
+    event.target.setPointerCapture(
+      event.pointerId
+    );
+  }
+  catch (error) {}
+}
+
+
+document.addEventListener(
+  "pointermove",
+  event => {
+
+    if (
+      !tubeBendDrag ||
+      event.pointerId !==
+        tubeBendDrag.pointerId
+    ) {
+      return;
+    }
+
+    const tube =
+      getTubeById(
+        tubeBendDrag.tubeId
+      );
+
+    if (!tube) {
+      return;
+    }
+
+    const point =
+      screenToCanvas(
+        event.clientX,
+        event.clientY
+      );
+
+    if (
+      tubeBendDrag.axis ===
+      "x"
+    ) {
+      tube.bendX =
+        point.x;
+    }
+
+    else {
+      tube.bendY =
+        point.y;
+    }
+
+    updateTubing();
+
+    event.preventDefault();
+
+  },
+  {
+    passive:
+      false
+  }
+);
+
+
+function finishTubeBendDrag(
+  event
+) {
+  if (
+    !tubeBendDrag ||
+    (
+      event &&
+      event.pointerId !==
+        tubeBendDrag.pointerId
+    )
+  ) {
+    return;
+  }
+
+  const tubeId =
+    tubeBendDrag.tubeId;
+
+  tubeBendDrag =
+    null;
+
+  document.body.classList.remove(
+    "tube-route-dragging"
+  );
+
+  renderPropertiesPanel();
+
+  showHint(
+    "Ruta del tubing actualizada"
+  );
+
+  commitHistory();
+
+  selectTube(
+    tubeId
+  );
+}
+
+
+document.addEventListener(
+  "pointerup",
+  finishTubeBendDrag,
+  true
+);
+
+
+document.addEventListener(
+  "pointercancel",
+  finishTubeBendDrag,
+  true
+);
+
+
+function resetTubeRoute(
+  tube
+) {
+  if (!tube) {
+    return;
+  }
+
+  delete tube.bendX;
+  delete tube.bendY;
+
+  updateTubing();
 }
 
 function roundedPolylinePath(points, radius) {
@@ -4685,6 +5181,27 @@ function renderPropertiesPanel() {
               >
                 Restablecer longitudes
               </button>
+
+              <div class="tube-route-helper">
+                <div class="tube-route-helper-icon">
+                  ●
+                </div>
+
+                <div>
+                  <strong>Mover ruta</strong>
+                  <span>
+                    Arrastra el punto azul del tubing para llevarlo por otra zona del plano.
+                  </span>
+                </div>
+              </div>
+
+              <button
+                class="property-btn secondary tube-reset-route"
+                type="button"
+                data-property-action="reset-tube-route"
+              >
+                Restablecer ruta automática
+              </button>
             </div>
           `
           : ""
@@ -4971,6 +5488,30 @@ if (propertiesBody) {
           showHint(
             "Longitudes del tubing restablecidas"
           );
+          commitHistory();
+        }
+      }
+
+      else if (
+        action ===
+        "reset-tube-route"
+      ) {
+        const tube =
+          getTubeById(
+            selectedTubeId
+          );
+
+        if (tube) {
+          resetTubeRoute(
+            tube
+          );
+
+          renderPropertiesPanel();
+
+          showHint(
+            "Ruta automática restablecida"
+          );
+
           commitHistory();
         }
       }
@@ -5351,6 +5892,11 @@ function createTubeSvgElement(
         path
       );
     }
+  );
+
+  appendTubeBendControls(
+    group,
+    id
   );
 
   group.addEventListener(

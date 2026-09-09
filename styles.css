@@ -1309,3 +1309,85 @@ body.library-touch-dragging {
     user-select: none;
   }
 }
+
+
+/* =========================================================
+   MANUAL TUBING ROUTE HANDLE
+========================================================= */
+
+.tube-bend-handle,
+.tube-bend-handle-hitbox {
+  display: none;
+}
+
+.tube-bend-handle.visible,
+.tube-bend-handle-hitbox.visible {
+  display: block;
+}
+
+.tube-bend-handle-hitbox {
+  fill: rgba(8, 121, 206, 0.001);
+  stroke: none;
+  pointer-events: all;
+  cursor: grab;
+}
+
+.tube-bend-handle {
+  fill: #0879ce;
+  stroke: #ffffff;
+  stroke-width: 4px;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.28));
+}
+
+body.tube-route-dragging,
+body.tube-route-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.tube-route-helper {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 14px;
+  padding: 10px 11px;
+  border: 1px solid #cfe5f5;
+  border-radius: 9px;
+  background: #f3faff;
+}
+
+.tube-route-helper-icon {
+  flex: 0 0 auto;
+  color: #0879ce;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.tube-route-helper strong,
+.tube-route-helper span {
+  display: block;
+}
+
+.tube-route-helper strong {
+  margin-bottom: 3px;
+  color: #16324f;
+  font-size: 12px;
+}
+
+.tube-route-helper span {
+  color: #5f7283;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.tube-reset-route {
+  width: 100%;
+  margin-top: 8px;
+}
+
+@media (pointer: coarse) {
+  .tube-bend-handle {
+    r: 13px;
+  }
+}
