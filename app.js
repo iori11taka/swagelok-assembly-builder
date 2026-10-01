@@ -2507,8 +2507,13 @@ function handleTubingPortClick(component, portDefinition, portElement) {
     return;
   }
 
-  if (tubingStart.port.connection.size !== connection.size) {
-    showHint("Los tamaños de tubing no coinciden");
+  // Los puertos sin tamaño declarado (por ejemplo, el Filtro OD) son
+  // universales dentro del sistema de tubing. Solo bloqueamos la unión si
+  // AMBOS extremos declaran un tamaño interno y esos tamaños son distintos.
+  const startSize = tubingStart.port.connection.size;
+  const endSize = connection.size;
+  if (startSize && endSize && startSize !== endSize) {
+    showHint("Las conexiones de tubing no son compatibles");
     return;
   }
 
@@ -2584,7 +2589,10 @@ function createTubing(componentA, portA, componentB, portB) {
 
   tubingConnections.push({
     id,
-    size: portA.connection.size,
+    // Conservamos un tamaño interno solo cuando alguno de los extremos lo
+    // necesita para geometría heredada. Los puertos OD genéricos pueden no
+    // declarar tamaño y aun así conectarse directamente a tubing.
+    size: portA.connection.size || portB.connection.size || "generic",
     material: "316SS",
     shape: selectedTubeShape,
     thickness: 1,
@@ -2593,8 +2601,8 @@ function createTubing(componentA, portA, componentB, portB) {
       Parámetros editables del tubing.
       Se usan especialmente en geometría 90°.
     */
-    legA: (TUBING_RULES[portA.connection.size] || TUBING_RULES["1/4"]).leadLength,
-    legB: (TUBING_RULES[portA.connection.size] || TUBING_RULES["1/4"]).leadLength,
+    legA: (TUBING_RULES[portA.connection.size || portB.connection.size] || TUBING_RULES["1/4"]).leadLength,
+    legB: (TUBING_RULES[portA.connection.size || portB.connection.size] || TUBING_RULES["1/4"]).leadLength,
 
     aId: componentA.dataset.id,
     aPortId: portA.id,
@@ -3708,7 +3716,10 @@ function enableDragging(component) {
 
 function areConnectionsCompatible(a, b) {
   if (!a || !b) return false;
-  if (a.size !== b.size) return false;
+  // Un puerto sin tamaño declarado actúa como conexión genérica. Esto es
+  // necesario para componentes como el Filtro OD, donde deliberadamente no
+  // mostramos ni exigimos una medida concreta.
+  if (a.size && b.size && a.size !== b.size) return false;
 
   // Los cuatro puertos del tanque son configurables. Además de aceptar
   // tubing de 1/4", pueden recibir directamente un componente de 1/4"
