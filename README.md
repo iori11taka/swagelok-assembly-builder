@@ -48,3 +48,11 @@ La herramienta no valida presión, temperatura, compatibilidad química o proced
 En el repositorio principal: `npm test` ejecuta 11 pruebas que cubren ambos talleres, referencias de archivos, conservación de conexiones y vistas, importaciones inválidas, reutilización de puertos y exportaciones. Compilación y sintaxis JavaScript verificadas. No se realizaron pruebas visuales en navegador ni en dispositivos físicos.
 
 Los JSON del taller conceptual anterior tienen otro formato; se abren en la versión anterior. Esta adaptación usa `taller-visual-v1` y conserva las vistas y conexiones propias de tu motor.
+
+## Sincronización multidispositivo (Supabase)
+1. En Supabase, abre **SQL Editor** y ejecuta `supabase-setup.sql` una sola vez.
+2. En **Authentication > Providers > Email**, deja Email habilitado. Si "Confirm email" está activo, cada usuario deberá confirmar su correo antes de iniciar sesión.
+3. Publica estos archivos en GitHub Pages normalmente.
+4. En la web usa **☁ Cuenta** para crear cuenta/iniciar sesión. El mismo usuario verá sus proyectos en cualquier dispositivo.
+
+La app conserva una copia local como respaldo y sincroniza el proyecto activo con Supabase cuando hay una sesión iniciada. RLS limita cada fila a su propietario.
