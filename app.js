@@ -160,7 +160,7 @@ const componentLibrary = {
       { id: "bottom", x: 0.53, y: 0.965, direction: 90, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "male" } },
       // Puerto híbrido: permite iniciar/finalizar tubing directamente y también
       // hacer snap con un componente de 1/4" (por ejemplo 400-1-4).
-      { id: "right", x: 0.94, y: 0.66, direction: 0, tubingInsertion: 12,
+      { id: "right", x: 1.045, y: 0.66, direction: 0, tubingInsertion: 0,
         connection: { family: "tube", size: "1/4", role: "tank-port" } }
     ]
   },
@@ -3945,7 +3945,7 @@ function positionComponentForConnection(
     ) *
     definition.height;
 
-  const portOffset = getPortOffset(component, port.id);
+  const portOffset = getPortOffset(sourceComponent, sourcePort.id);
 
   const rotated =
     rotateVector(
