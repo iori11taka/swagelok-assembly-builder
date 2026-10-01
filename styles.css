@@ -1404,3 +1404,19 @@ body.tube-route-dragging * {
 .tank-size-controls label{display:grid;grid-template-columns:1fr auto;gap:7px;font-size:14px}
 .tank-size-controls input{grid-column:1/-1;width:100%;accent-color:#1286c8}
 .tank-size-controls small{color:#6b7f8c;line-height:1.4}
+
+/* Editable component metadata */
+.property-text-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border, #d8e0e8);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  background: var(--panel, #fff);
+  color: inherit;
+  outline: none;
+}
+.property-text-input:focus {
+  border-color: #1683e8;
+}

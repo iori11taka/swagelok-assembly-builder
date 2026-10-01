@@ -1898,10 +1898,10 @@ function createComponent(
     component.dataset.sgrs12Mode = "single";
   }
 
-  if (definition.resizable) {
-    component.dataset.customWidth = String(definition.width);
-    component.dataset.customHeight = String(definition.height);
-  }
+  // Todos los componentes pueden redimensionarse manualmente.
+  component.dataset.customWidth = String(definition.width);
+  component.dataset.customHeight = String(definition.height);
+  component.dataset.customName = baseDefinition.name || definition.name || type;
 
   if (
     baseDefinition.views
@@ -2409,10 +2409,14 @@ function tryAutoAlignStraightTube(
 function handleTubingPortClick(component, portDefinition, portElement) {
   const connection = portDefinition.connection;
 
-  if (connection.family !== "tube") return;
+  const sgrs12DirectTube =
+    component.dataset.type === "sgrs12" &&
+    ["left", "right"].includes(portDefinition.id);
+
+  if (connection.family !== "tube" && !sgrs12DirectTube) return;
 
   if (isPortOccupied(component.dataset.id, portDefinition.id)) {
-    showHint("Ese Tube Fitting ya está ocupado");
+    showHint("Ese puerto ya está ocupado");
     return;
   }
 
@@ -2508,6 +2512,7 @@ function createTubing(componentA, portA, componentB, portB) {
     size: portA.connection.size,
     material: "316SS",
     shape: selectedTubeShape,
+    thickness: 1,
 
     /*
       Parámetros editables del tubing.
@@ -2561,6 +2566,23 @@ function updateTubing() {
 
     group.querySelectorAll("path").forEach(path => {
       path.setAttribute("d", pathData);
+    });
+
+    // Grosor visual editable del tubing.
+    const thickness = Math.max(0.45, Math.min(3.5, Number(tube.thickness || 1)));
+    const widths = {
+      ".tube-hitbox": 34,
+      ".tube-outer": 18,
+      ".tube-body": 14,
+      ".tube-reflection": 7,
+      ".tube-shine": 2
+    };
+
+    Object.entries(widths).forEach(([selector, baseWidth]) => {
+      const path = group.querySelector(selector);
+      if (path) {
+        path.style.strokeWidth = `${baseWidth * thickness}px`;
+      }
     });
 
     updateTubeBendHandle(
@@ -4601,30 +4623,26 @@ function getComponentDefinition(
     return null;
   }
 
+  const customWidth = parseFloat(
+    component.dataset.customWidth || component.style.width
+  );
+  const customHeight = parseFloat(
+    component.dataset.customHeight || component.style.height
+  );
+
+  const result = {
+    ...definition,
+    name: component.dataset.customName || definition.name,
+    width: Number.isFinite(customWidth) ? customWidth : definition.width,
+    height: Number.isFinite(customHeight) ? customHeight : definition.height
+  };
+
   if (component.dataset.type === "sgrs12") {
     const active = new Set(getSgrs12ActivePortIds(component));
-    return {
-      ...definition,
-      ports: definition.ports.filter(port => active.has(port.id))
-    };
+    result.ports = definition.ports.filter(port => active.has(port.id));
   }
 
-  // Los componentes redimensionables (actualmente el tanque) deben usar
-  // sus dimensiones reales para calcular puertos, snap y tubing.
-  // Antes se seguian usando 180 x 320 aunque la imagen cambiara de tamano,
-  // por eso los puntos de conexion quedaban desalineados.
-  if (component.dataset.type === "tank") {
-    const customWidth = parseFloat(component.dataset.customWidth || component.style.width);
-    const customHeight = parseFloat(component.dataset.customHeight || component.style.height);
-
-    return {
-      ...definition,
-      width: Number.isFinite(customWidth) ? customWidth : definition.width,
-      height: Number.isFinite(customHeight) ? customHeight : definition.height
-    };
-  }
-
-  return definition;
+  return result;
 }
 
 function getComponentById(id) {
@@ -5243,6 +5261,59 @@ function renderPropertiesPanel() {
       }
 
       <div class="property-block">
+        <div class="property-label">Nombre / código del componente</div>
+        <input
+          class="property-text-input"
+          type="text"
+          value="${escapeHtml(selectedComponent.dataset.customName || definition.name)}"
+          data-component-custom-name
+          placeholder="Ej. SS-810-3"
+        >
+      </div>
+
+      <div class="property-block">
+        <div class="property-label">Tamaño manual</div>
+
+        <div class="tube-leg-control">
+          <div class="tube-leg-header">
+            <span>Ancho</span>
+            <strong>${Math.round(definition.width)} px</strong>
+          </div>
+          <input
+            type="range"
+            min="40"
+            max="900"
+            step="5"
+            value="${Math.round(definition.width)}"
+            data-component-size="width"
+          >
+        </div>
+
+        <div class="tube-leg-control">
+          <div class="tube-leg-header">
+            <span>Alto</span>
+            <strong>${Math.round(definition.height)} px</strong>
+          </div>
+          <input
+            type="range"
+            min="40"
+            max="900"
+            step="5"
+            value="${Math.round(definition.height)}"
+            data-component-size="height"
+          >
+        </div>
+
+        <button
+          class="property-btn secondary"
+          type="button"
+          data-property-action="reset-component-size"
+        >
+          Restablecer tamaño original
+        </button>
+      </div>
+
+      <div class="property-block">
         <div class="property-label">Rotación</div>
         <div class="property-value">
           ${rotation}°
@@ -5306,6 +5377,24 @@ function renderPropertiesPanel() {
         <div class="property-label">Material</div>
         <div class="property-value">
           ${escapeHtml(tube.material || "316SS")}
+        </div>
+      </div>
+
+      <div class="property-block">
+        <div class="property-label">Grosor del tubing</div>
+        <div class="tube-leg-control">
+          <div class="tube-leg-header">
+            <span>Escala visual</span>
+            <strong>${Number(tube.thickness || 1).toFixed(2)}×</strong>
+          </div>
+          <input
+            type="range"
+            min="0.45"
+            max="3.5"
+            step="0.05"
+            value="${Number(tube.thickness || 1)}"
+            data-tube-thickness
+          >
         </div>
       </div>
 
@@ -5504,6 +5593,45 @@ if (propertiesBody) {
   propertiesBody.addEventListener(
     "input",
     event => {
+      const nameInput = event.target.closest("[data-component-custom-name]");
+      if (nameInput && selectedComponent) {
+        selectedComponent.dataset.customName = nameInput.value;
+        propertiesTitle.textContent = nameInput.value || getComponentDefinition(selectedComponent)?.name || "Componente";
+        return;
+      }
+
+      const sizeInput = event.target.closest("[data-component-size]");
+      if (sizeInput && selectedComponent) {
+        const value = Math.max(40, Number(sizeInput.value));
+        if (sizeInput.dataset.componentSize === "width") {
+          selectedComponent.dataset.customWidth = String(value);
+          selectedComponent.style.width = `${value}px`;
+        } else {
+          selectedComponent.dataset.customHeight = String(value);
+          selectedComponent.style.height = `${value}px`;
+        }
+
+        const valueLabel = sizeInput.closest(".tube-leg-control")?.querySelector(".tube-leg-header strong");
+        if (valueLabel) valueLabel.textContent = `${Math.round(value)} px`;
+
+        updateVisualPorts(selectedComponent);
+        updateTubing();
+        refreshPorts();
+        return;
+      }
+
+      const thicknessInput = event.target.closest("[data-tube-thickness]");
+      if (thicknessInput && selectedTubeId) {
+        const tube = getTubeById(selectedTubeId);
+        if (tube) {
+          tube.thickness = Number(thicknessInput.value);
+          const valueLabel = thicknessInput.closest(".tube-leg-control")?.querySelector(".tube-leg-header strong");
+          if (valueLabel) valueLabel.textContent = `${tube.thickness.toFixed(2)}×`;
+          updateTubing();
+        }
+        return;
+      }
+
       const legInput =
         event.target.closest(
           "[data-tube-leg]"
@@ -5568,11 +5696,13 @@ if (propertiesBody) {
     "change",
     event => {
       if (
-        event.target.closest(
-          "[data-tube-leg]"
-        )
+        event.target.closest("[data-tube-leg]") ||
+        event.target.closest("[data-tube-thickness]") ||
+        event.target.closest("[data-component-size]") ||
+        event.target.closest("[data-component-custom-name]")
       ) {
         commitHistory();
+        if (selectedComponent) renderPropertiesPanel();
       }
     }
   );
@@ -5682,6 +5812,26 @@ if (propertiesBody) {
 
       if (action === "rotate") {
         rotateSelected();
+      }
+
+      else if (action === "reset-component-size" && selectedComponent) {
+        const base = getComponentDefinitionByType(
+          selectedComponent.dataset.type,
+          selectedComponent.dataset.view || null
+        );
+
+        if (base) {
+          selectedComponent.dataset.customWidth = String(base.width);
+          selectedComponent.dataset.customHeight = String(base.height);
+          selectedComponent.style.width = `${base.width}px`;
+          selectedComponent.style.height = `${base.height}px`;
+          updateVisualPorts(selectedComponent);
+          updateTubing();
+          refreshPorts();
+          renderPropertiesPanel();
+          commitHistory();
+          showHint("Tamaño original restablecido");
+        }
       }
 
       else if (
@@ -5800,7 +5950,8 @@ function serializeProjectState() {
         null,
       customWidth: component.dataset.customWidth ? Number(component.dataset.customWidth) : null,
       customHeight: component.dataset.customHeight ? Number(component.dataset.customHeight) : null,
-      sgrs12Mode: component.dataset.sgrs12Mode || null
+      sgrs12Mode: component.dataset.sgrs12Mode || null,
+      customName: component.dataset.customName || null
     }));
 
   return {
@@ -6024,11 +6175,16 @@ function restoreProjectState(state) {
         updateSgrs12PortVisibility(component);
       }
 
-      if (saved.type === "tank" && saved.customWidth && saved.customHeight) {
+      if (saved.customWidth && saved.customHeight) {
         component.dataset.customWidth = String(saved.customWidth);
         component.dataset.customHeight = String(saved.customHeight);
         component.style.width = `${saved.customWidth}px`;
         component.style.height = `${saved.customHeight}px`;
+        updateVisualPorts(component);
+      }
+
+      if (saved.customName) {
+        component.dataset.customName = saved.customName;
       }
 
       setComponentRotation(
