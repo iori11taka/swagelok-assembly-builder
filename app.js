@@ -4425,19 +4425,73 @@ function updateVisualPorts(
 
     if (!element) return;
 
-    const localX =
-      (
-        port.x -
-        0.5
-      ) *
+    /*
+      Puerto anclado físicamente a la pieza:
+      al cambiar ancho/alto no escalamos ciegamente x/y.
+      Conservamos la distancia original al borde más cercano.
+      Esto evita que un puerto lateral/superior se aleje del fitting
+      cuando el usuario agranda el componente.
+    */
+    const baseDefinition =
+      getComponentDefinitionByType(
+        component.dataset.type,
+        component.dataset.view || null
+      ) || definition;
+
+    const baseWidth =
+      Number(baseDefinition.width) ||
       definition.width;
 
-    const localY =
-      (
-        port.y -
-        0.5
-      ) *
+    const baseHeight =
+      Number(baseDefinition.height) ||
       definition.height;
+
+    const originalX =
+      Number(port.x) *
+      baseWidth;
+
+    const originalY =
+      Number(port.y) *
+      baseHeight;
+
+    const xFromLeft =
+      originalX;
+
+    const xFromRight =
+      baseWidth -
+      originalX;
+
+    const yFromTop =
+      originalY;
+
+    const yFromBottom =
+      baseHeight -
+      originalY;
+
+    /*
+      En cada eje elegimos el borde original más cercano.
+      Ej.: puerto derecho conserva su separación al borde derecho;
+      puerto superior conserva su separación al borde superior.
+    */
+    const anchoredX =
+      xFromLeft <= xFromRight
+        ? xFromLeft
+        : definition.width -
+          xFromRight;
+
+    const anchoredY =
+      yFromTop <= yFromBottom
+        ? yFromTop
+        : definition.height -
+          yFromBottom;
+
+    const localX =
+      anchoredX -
+      definition.width / 2;
+
+    const localY =
+      anchoredY -
+      definition.height / 2;
 
     const rotated =
       rotateVector(
