@@ -104,8 +104,8 @@ const componentLibrary = {
     name: "SGRS12",
     image: "assets/SGRS12.png",
     className: "sgrs12",
-    width: 260,
-    height: 183,
+    width: 650,
+    height: 458,
     ports: [
       { id: "top", x: 0.50, y: 0.065, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
       { id: "top-left", x: 0.38, y: 0.14, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
