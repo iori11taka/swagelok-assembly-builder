@@ -110,8 +110,8 @@ const componentLibrary = {
       { id: "top", x: 0.50, y: 0.065, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
       { id: "top-left", x: 0.38, y: 0.14, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
       { id: "top-right", x: 0.62, y: 0.14, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
-      { id: "left", x: 0.045, y: 0.50, direction: 180, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
-      { id: "right", x: 0.955, y: 0.50, direction: 0, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } }
+      { id: "left", x: 0.045, y: 0.50, direction: 180, tubingInsertion: 20, connection: { family: "tube", size: "1/4", role: "tube-fitting" } },
+      { id: "right", x: 0.955, y: 0.50, direction: 0, tubingInsertion: 20, connection: { family: "tube", size: "1/4", role: "tube-fitting" } }
     ]
   },
 
@@ -2413,11 +2413,7 @@ function tryAutoAlignStraightTube(
 function handleTubingPortClick(component, portDefinition, portElement) {
   const connection = portDefinition.connection;
 
-  const sgrs12DirectTube =
-    component.dataset.type === "sgrs12" &&
-    ["left", "right"].includes(portDefinition.id);
-
-  if (connection.family !== "tube" && !sgrs12DirectTube) return;
+  if (connection.family !== "tube") return;
 
   if (isPortOccupied(component.dataset.id, portDefinition.id)) {
     showHint("Ese puerto ya está ocupado");

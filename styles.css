@@ -1436,3 +1436,27 @@ body.tube-route-dragging * {
   pointer-events: none;
   filter: drop-shadow(0 1px 2px rgba(255,255,255,.9));
 }
+
+
+/* =========================================================
+   CAPAS DE COMPONENTES
+   Los manómetros conectados al SGRS12 deben entrar visualmente
+   por detrás del cuerpo del regulador.
+========================================================= */
+.canvas-component.sgrs12 {
+  z-index: 20;
+}
+
+.canvas-component.gauge {
+  z-index: 10;
+}
+
+/* Mantiene puertos/selección utilizables aunque la imagen tenga capa propia. */
+.canvas-component .component-visual {
+  position: relative;
+  z-index: 1;
+}
+.canvas-component .connection-port,
+.canvas-component .selection-box {
+  z-index: 30;
+}
