@@ -21,7 +21,9 @@ const propertiesPanel = document.getElementById("propertiesPanel");
 const propertiesTitle = document.getElementById("propertiesTitle");
 const propertiesBody = document.getElementById("propertiesBody");
 const closePropertiesBtn = document.getElementById("closePropertiesBtn");
+const viewModeBtn = document.getElementById("viewModeBtn");
 
+let viewOnlyMode = false;
 let selectedComponent = null;
 let selectedTubeId = null;
 let tubeBendDrag = null;
@@ -506,6 +508,42 @@ const componentLibrary = {
         connection:{ family:"tube", size:"1/4", role:"tank-port" } },
       { id:"left", x:0.300, y:0.245, direction:180, tubingInsertion:18,
         connection:{ family:"tube", size:"1/4", role:"tank-port" } }
+    ]
+  },
+
+  teeOdNpt: {
+    name: "Tee OD × NPT",
+    image: "assets/TEE-OD-NPT.png",
+    className: "teeOdNpt",
+    width: 300,
+    height: 230,
+    category: "Conector",
+    connectionLabel: "OD laterales × NPT inferior",
+    ports: [
+      {
+        id: "tube-left",
+        x: 0.018,
+        y: 0.38,
+        direction: 180,
+        tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" }
+      },
+      {
+        id: "tube-right",
+        x: 0.982,
+        y: 0.38,
+        direction: 0,
+        tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" }
+      },
+      {
+        id: "npt-bottom",
+        x: 0.50,
+        y: 0.965,
+        direction: 90,
+        insertionDepth: 22,
+        connection: { family: "thread", standard: "NPT", gender: "female" }
+      }
     ]
   },
 
@@ -2332,6 +2370,37 @@ workspace.addEventListener("pointerdown", event => {
 });
 
 
+function setViewOnlyMode(enabled) {
+  viewOnlyMode = Boolean(enabled);
+  document.body.classList.toggle("view-only-mode", viewOnlyMode);
+
+  if (viewModeBtn) {
+    viewModeBtn.classList.toggle("active", viewOnlyMode);
+    viewModeBtn.textContent = viewOnlyMode ? "✕ Salir de vista" : "◉ Solo vista";
+    viewModeBtn.title = viewOnlyMode
+      ? "Volver al modo de edición"
+      : "Abrir el conjunto en modo solo vista";
+  }
+
+  // Solo selección/consulta: desactiva cualquier herramienta de edición activa.
+  if (viewOnlyMode) {
+    currentTool = "select";
+    selectToolBtn?.classList.add("active");
+    tubingToolBtn?.classList.remove("active");
+    if (tubingMenu) tubingMenu.hidden = true;
+    clearSnapPreview();
+    showHint("Solo vista · selecciona una pieza para consultar sus datos");
+  } else {
+    showHint("Modo edición restaurado");
+  }
+}
+
+viewModeBtn?.addEventListener("click", () => {
+  setViewOnlyMode(!viewOnlyMode);
+});
+
+
+
 function getComponentPosition(
   component
 ) {
@@ -3535,6 +3604,13 @@ function enableDragging(component) {
     event.preventDefault();
 
     selectComponent(component);
+
+    // En modo Solo vista las piezas se pueden seleccionar para consultar
+    // sus detalles/datos técnicos, pero nunca se arrastran ni se desunen.
+    if (viewOnlyMode) {
+      showHint("Solo vista · selecciona una pieza para consultar sus datos");
+      return;
+    }
 
     if (component.dataset.locked === "true") {
       showHint("Componente fijado · desbloquéalo para moverlo");

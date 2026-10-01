@@ -278,3 +278,117 @@
     margin-bottom: 10px;
   }
 }
+
+/* =========================================================
+   MODO SOLO VISTA
+   El lienzo pasa a ser la interfaz principal. Las piezas se
+   pueden seleccionar para consultar datos, pero no editar.
+   ========================================================= */
+body.view-only-mode {
+  overflow: hidden;
+}
+
+body.view-only-mode .topbar {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  width: auto;
+  min-height: 0;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  z-index: 5000;
+  pointer-events: none;
+}
+body.view-only-mode .topbar .brand,
+body.view-only-mode .topbar .header-caption,
+body.view-only-mode .topbar .portal-return-btn,
+body.view-only-mode .topbar #openProjectsBtn,
+body.view-only-mode .topbar #createProjectBtn {
+  display: none !important;
+}
+body.view-only-mode .topbar .top-actions {
+  pointer-events: auto;
+}
+body.view-only-mode #viewModeBtn {
+  display: inline-flex !important;
+  align-items: center;
+  min-height: 38px;
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: 0 3px 14px #142f4020;
+}
+body.view-only-mode .workshop-tabs,
+body.view-only-mode .sidebar,
+body.view-only-mode .bottom-bar,
+body.view-only-mode .floating-toolbar,
+body.view-only-mode .workspace-hint,
+body.view-only-mode .canvas-topline {
+  display: none !important;
+}
+body.view-only-mode .app-layout {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  min-height: 0;
+  max-height: none;
+  display: block;
+}
+body.view-only-mode .workspace-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+body.view-only-mode .workspace {
+  inset: 0;
+}
+body.view-only-mode .workspace-wrapper > .zoom-box {
+  display: flex !important;
+  top: 14px;
+  left: 14px;
+  right: auto;
+  z-index: 120;
+}
+body.view-only-mode .detail-column {
+  position: fixed;
+  top: 64px;
+  right: 14px;
+  bottom: 14px;
+  width: 310px;
+  z-index: 4000;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px #142f4024;
+}
+body.view-only-mode .detail-column:has(.properties-panel.hidden) {
+  display: none;
+}
+body.view-only-mode .properties-panel {
+  background: #fff;
+}
+body.view-only-mode .canvas-component {
+  cursor: pointer !important;
+}
+body.view-only-mode .canvas-component.dragging {
+  cursor: pointer !important;
+}
+
+@media (max-width: 650px) {
+  body.view-only-mode .detail-column {
+    top: auto;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    max-height: 46dvh;
+  }
+}
