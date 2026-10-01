@@ -100,6 +100,21 @@ const componentLibrary = {
     ]
   },
 
+  sgrs12: {
+    name: "SGRS12",
+    image: "assets/SGRS12.png",
+    className: "sgrs12",
+    width: 260,
+    height: 183,
+    ports: [
+      { id: "top", x: 0.50, y: 0.065, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
+      { id: "top-left", x: 0.38, y: 0.14, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
+      { id: "top-right", x: 0.62, y: 0.14, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
+      { id: "left", x: 0.045, y: 0.50, direction: 180, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
+      { id: "right", x: 0.955, y: 0.50, direction: 0, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } }
+    ]
+  },
+
   gauge: {
     name: "Manómetro PGI",
     image: "assets/PGI.png",
@@ -781,7 +796,7 @@ workspace.addEventListener("drop", event => {
   const point = screenToCanvas(event.clientX, event.clientY);
   const component = createComponent(type, point.x, point.y);
 
-  if (component && type !== "regulator" && snapToggle.checked) {
+  if (component && !["regulator", "sgrs12"].includes(type) && snapToggle.checked) {
     trySnapComponent(component, true);
   }
 });
@@ -1879,6 +1894,10 @@ function createComponent(
   component.dataset.rotation =
     "0";
 
+  if (type === "sgrs12") {
+    component.dataset.sgrs12Mode = "single";
+  }
+
   if (definition.resizable) {
     component.dataset.customWidth = String(definition.width);
     component.dataset.customHeight = String(definition.height);
@@ -2021,6 +2040,10 @@ function createComponent(
   canvas.appendChild(
     component
   );
+
+  if (type === "sgrs12") {
+    updateSgrs12PortVisibility(component);
+  }
 
   updateVisualPorts(
     component
@@ -3430,7 +3453,7 @@ function enableDragging(component) {
     draggingRigidGroup =
       hasRigidConnections &&
       (
-        component.dataset.type === "regulator" ||
+        ["regulator", "sgrs12"].includes(component.dataset.type) ||
         event.shiftKey
       );
 
@@ -4507,6 +4530,60 @@ function isVerticalDirection(
   );
 }
 
+function getSgrs12ActivePortIds(component) {
+  return component?.dataset?.sgrs12Mode === "dual"
+    ? ["top-left", "top-right", "left", "right"]
+    : ["top", "left", "right"];
+}
+
+function updateSgrs12PortVisibility(component) {
+  if (!component || component.dataset.type !== "sgrs12") return;
+  const active = new Set(getSgrs12ActivePortIds(component));
+  component.querySelectorAll(".connection-port").forEach(port => {
+    port.style.display = active.has(port.dataset.portId) ? "" : "none";
+  });
+}
+
+function setSgrs12Mode(component, mode) {
+  if (!component || component.dataset.type !== "sgrs12") return;
+
+  const nextMode = mode === "dual" ? "dual" : "single";
+  const nextPorts = new Set(
+    nextMode === "dual"
+      ? ["top-left", "top-right", "left", "right"]
+      : ["top", "left", "right"]
+  );
+
+  const hasBlockedRigid = connections.some(c =>
+    (c.aId === component.dataset.id && !nextPorts.has(c.aPortId)) ||
+    (c.bId === component.dataset.id && !nextPorts.has(c.bPortId))
+  );
+
+  const hasBlockedTube = tubingConnections.some(t =>
+    (t.aComponentId === component.dataset.id && !nextPorts.has(t.aPortId)) ||
+    (t.bComponentId === component.dataset.id && !nextPorts.has(t.bPortId))
+  );
+
+  if (hasBlockedRigid || hasBlockedTube) {
+    showHint("Desconecta primero la conexión superior que cambiará");
+    return;
+  }
+
+  component.dataset.sgrs12Mode = nextMode;
+  updateSgrs12PortVisibility(component);
+  updateVisualPorts(component);
+  refreshPorts();
+  renderPropertiesPanel();
+  commitHistory();
+
+  showHint(
+    nextMode === "dual"
+      ? "SGRS12 · 2 conexiones superiores para manómetros"
+      : "SGRS12 · 1 conexión superior"
+  );
+}
+
+
 function getComponentDefinition(
   component
 ) {
@@ -4522,6 +4599,14 @@ function getComponentDefinition(
 
   if (!definition) {
     return null;
+  }
+
+  if (component.dataset.type === "sgrs12") {
+    const active = new Set(getSgrs12ActivePortIds(component));
+    return {
+      ...definition,
+      ports: definition.ports.filter(port => active.has(port.id))
+    };
   }
 
   // Los componentes redimensionables (actualmente el tanque) deben usar
@@ -5135,6 +5220,28 @@ function renderPropertiesPanel() {
         })()
       }
 
+      ${
+        selectedComponent.dataset.type === "sgrs12"
+          ? `
+            <div class="property-block">
+              <div class="property-label">Conexiones superiores</div>
+              <div class="property-actions">
+                <button type="button"
+                  class="property-btn ${selectedComponent.dataset.sgrs12Mode !== "dual" ? "active" : ""}"
+                  data-sgrs12-mode="single">
+                  1 superior
+                </button>
+                <button type="button"
+                  class="property-btn ${selectedComponent.dataset.sgrs12Mode === "dual" ? "active" : ""}"
+                  data-sgrs12-mode="dual">
+                  2 para manómetros
+                </button>
+              </div>
+            </div>
+          `
+          : ""
+      }
+
       <div class="property-block">
         <div class="property-label">Rotación</div>
         <div class="property-value">
@@ -5340,6 +5447,7 @@ function hidePropertiesPanel() {
 
 function getPortDisplayName(portId) {
   const labels = {
+    "top": "Superior",
     "top-left": "Superior izquierdo",
     "top-right": "Superior derecho",
     "left": "Izquierdo",
@@ -5358,6 +5466,7 @@ function getPortDisplayName(portId) {
 function getComponentCategoryName(type) {
   const labels = {
     regulator: "Regulador",
+    sgrs12: "Regulador",
     gauge: "Instrumentación",
     adapter400: "Conector",
     union400: "Tube Fitting",
@@ -5471,6 +5580,22 @@ if (propertiesBody) {
   propertiesBody.addEventListener(
     "click",
     event => {
+      const sgrs12ModeButton =
+        event.target.closest(
+          "[data-sgrs12-mode]"
+        );
+
+      if (
+        sgrs12ModeButton &&
+        selectedComponent?.dataset.type === "sgrs12"
+      ) {
+        setSgrs12Mode(
+          selectedComponent,
+          sgrs12ModeButton.dataset.sgrs12Mode
+        );
+        return;
+      }
+
       const viewButton =
         event.target.closest(
           "[data-component-view]"
@@ -5674,7 +5799,8 @@ function serializeProjectState() {
         component.dataset.view ||
         null,
       customWidth: component.dataset.customWidth ? Number(component.dataset.customWidth) : null,
-      customHeight: component.dataset.customHeight ? Number(component.dataset.customHeight) : null
+      customHeight: component.dataset.customHeight ? Number(component.dataset.customHeight) : null,
+      sgrs12Mode: component.dataset.sgrs12Mode || null
     }));
 
   return {
@@ -5892,6 +6018,11 @@ function restoreProjectState(state) {
 
       component.style.top =
         `${saved.top}px`;
+
+      if (saved.type === "sgrs12") {
+        component.dataset.sgrs12Mode = saved.sgrs12Mode || "single";
+        updateSgrs12PortVisibility(component);
+      }
 
       if (saved.type === "tank" && saved.customWidth && saved.customHeight) {
         component.dataset.customWidth = String(saved.customWidth);
