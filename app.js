@@ -4416,6 +4416,45 @@ function updateVisualPorts(
       0
     );
 
+  /*
+    IMPORTANTE:
+    La imagen usa object-fit: contain. Por eso, cuando el usuario cambia
+    ancho y alto de forma independiente, la imagen NO necesariamente ocupa
+    toda la caja del componente.
+
+    Los puertos deben seguir el borde visible de la imagen, no el borde de
+    la caja de selección.
+  */
+  const baseDefinition =
+    getComponentDefinitionByType(
+      component.dataset.type,
+      component.dataset.view || null
+    ) || definition;
+
+  const baseWidth =
+    Number(baseDefinition.width) || 1;
+
+  const baseHeight =
+    Number(baseDefinition.height) || 1;
+
+  const boxWidth =
+    Number(definition.width) || baseWidth;
+
+  const boxHeight =
+    Number(definition.height) || baseHeight;
+
+  const imageScale =
+    Math.min(
+      boxWidth / baseWidth,
+      boxHeight / baseHeight
+    );
+
+  const renderedWidth =
+    baseWidth * imageScale;
+
+  const renderedHeight =
+    baseHeight * imageScale;
+
   definition.ports.forEach(port => {
     const element =
       findPortElement(
@@ -4426,72 +4465,20 @@ function updateVisualPorts(
     if (!element) return;
 
     /*
-      Puerto anclado físicamente a la pieza:
-      al cambiar ancho/alto no escalamos ciegamente x/y.
-      Conservamos la distancia original al borde más cercano.
-      Esto evita que un puerto lateral/superior se aleje del fitting
-      cuando el usuario agranda el componente.
+      port.x / port.y están definidos respecto de la imagen original.
+      Los convertimos a la imagen realmente visible después de object-fit.
     */
-    const baseDefinition =
-      getComponentDefinitionByType(
-        component.dataset.type,
-        component.dataset.view || null
-      ) || definition;
-
-    const baseWidth =
-      Number(baseDefinition.width) ||
-      definition.width;
-
-    const baseHeight =
-      Number(baseDefinition.height) ||
-      definition.height;
-
-    const originalX =
-      Number(port.x) *
-      baseWidth;
-
-    const originalY =
-      Number(port.y) *
-      baseHeight;
-
-    const xFromLeft =
-      originalX;
-
-    const xFromRight =
-      baseWidth -
-      originalX;
-
-    const yFromTop =
-      originalY;
-
-    const yFromBottom =
-      baseHeight -
-      originalY;
-
-    /*
-      En cada eje elegimos el borde original más cercano.
-      Ej.: puerto derecho conserva su separación al borde derecho;
-      puerto superior conserva su separación al borde superior.
-    */
-    const anchoredX =
-      xFromLeft <= xFromRight
-        ? xFromLeft
-        : definition.width -
-          xFromRight;
-
-    const anchoredY =
-      yFromTop <= yFromBottom
-        ? yFromTop
-        : definition.height -
-          yFromBottom;
-
     const localX =
-      anchoredX -
-      definition.width / 2;
+      (
+        Number(port.x) - 0.5
+      ) *
+      renderedWidth;
 
     const localY =
-      anchoredY -
-      definition.height / 2;
+      (
+        Number(port.y) - 0.5
+      ) *
+      renderedHeight;
 
     const rotated =
       rotateVector(
@@ -4502,15 +4489,13 @@ function updateVisualPorts(
 
     element.style.left =
       `${
-        definition.width /
-        2 +
+        boxWidth / 2 +
         rotated.x
       }px`;
 
     element.style.top =
       `${
-        definition.height /
-        2 +
+        boxHeight / 2 +
         rotated.y
       }px`;
   });
