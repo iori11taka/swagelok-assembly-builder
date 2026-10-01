@@ -1925,6 +1925,9 @@ function createComponent(
   component.dataset.technicalData = "[]";
   component.dataset.propertiesTab = "details";
 
+  // Ajustes manuales de puertos (px). Se usan especialmente en el tanque.
+  component.dataset.portOffsets = "{}";
+
   if (
     baseDefinition.views
   ) {
@@ -2252,17 +2255,6 @@ function resizeTankComponent(component, width, height, commit = true) {
   refreshPorts();
   if (commit && !isRestoringState) commitHistory();
 }
-
-document.addEventListener("input", event => {
-  if (!selectedComponent || selectedComponent.dataset.type !== "tank") return;
-  if (event.target.id === "tankWidthControl")
-    resizeTankComponent(selectedComponent, event.target.value, parseFloat(selectedComponent.style.height), false);
-  if (event.target.id === "tankHeightControl")
-    resizeTankComponent(selectedComponent, parseFloat(selectedComponent.style.width), event.target.value, false);
-});
-document.addEventListener("change", event => {
-  if (event.target.id === "tankWidthControl" || event.target.id === "tankHeightControl") commitHistory();
-});
 
 workspace.addEventListener("pointerdown", event => {
   if (currentTool !== "select") return;
@@ -3916,10 +3908,12 @@ function positionComponentForConnection(
     ) *
     definition.height;
 
+  const portOffset = getPortOffset(component, port.id);
+
   const rotated =
     rotateVector(
-      localX,
-      localY,
+      localX + portOffset.x,
+      localY + portOffset.y,
       rotation
     );
 
@@ -3964,6 +3958,26 @@ function positionComponentForConnection(
       definition.height /
       2
     }px`;
+}
+
+function getPortOffset(component, portId) {
+  try {
+    const offsets = JSON.parse(component?.dataset?.portOffsets || "{}");
+    const item = offsets && offsets[portId] ? offsets[portId] : {};
+    return { x: Number(item.x) || 0, y: Number(item.y) || 0 };
+  } catch (error) {
+    return { x: 0, y: 0 };
+  }
+}
+
+function setPortOffset(component, portId, axis, value) {
+  if (!component || !portId || !["x", "y"].includes(axis)) return;
+  let offsets = {};
+  try { offsets = JSON.parse(component.dataset.portOffsets || "{}"); } catch (error) {}
+  if (!offsets || typeof offsets !== "object") offsets = {};
+  if (!offsets[portId]) offsets[portId] = { x: 0, y: 0 };
+  offsets[portId][axis] = Number(value) || 0;
+  component.dataset.portOffsets = JSON.stringify(offsets);
 }
 
 function getPortWorldPoint(
@@ -4503,10 +4517,12 @@ function updateVisualPorts(
       ) *
       renderedHeight;
 
+    const portOffset = getPortOffset(component, port.id);
+
     const rotated =
       rotateVector(
-        localX,
-        localY,
+        localX + portOffset.x,
+        localY + portOffset.y,
         rotation
       );
 
@@ -5439,6 +5455,34 @@ function renderPropertiesPanel() {
         </button>
       </div>
 
+      ${
+        selectedComponent.dataset.type === "tank"
+          ? (() => {
+              const offsets = (() => { try { return JSON.parse(selectedComponent.dataset.portOffsets || "{}"); } catch (e) { return {}; } })();
+              const rows = [
+                ["top", "Superior", "y", -120, 120],
+                ["bottom", "Inferior", "y", -180, 180],
+                ["left", "Izquierdo", "x", -180, 180],
+                ["right", "Derecho", "x", -180, 180]
+              ];
+              return `
+                <div class="property-block tank-port-adjustments">
+                  <div class="property-label">Ajuste de conexiones</div>
+                  <div class="technical-data-intro">Mueve cada puerto hasta el borde visual del tanque.</div>
+                  ${rows.map(([id, label, axis, min, max]) => {
+                    const value = Number(offsets?.[id]?.[axis]) || 0;
+                    return `
+                      <div class="tube-leg-control">
+                        <div class="tube-leg-header"><span>${label}</span><strong>${value > 0 ? "+" : ""}${value} px</strong></div>
+                        <input type="range" min="${min}" max="${max}" step="1" value="${value}" data-tank-port="${id}" data-tank-port-axis="${axis}">
+                      </div>`;
+                  }).join("")}
+                  <button class="property-btn secondary" type="button" data-property-action="reset-tank-ports">Restablecer posiciones</button>
+                </div>`;
+            })()
+          : ""
+      }
+
       <div class="property-block">
         <div class="property-label">Rotación</div>
         <div class="property-value">
@@ -5803,6 +5847,20 @@ if (propertiesBody) {
         return;
       }
 
+      const tankPortInput = event.target.closest("[data-tank-port]");
+      if (tankPortInput && selectedComponent?.dataset.type === "tank") {
+        const portId = tankPortInput.dataset.tankPort;
+        const axis = tankPortInput.dataset.tankPortAxis;
+        const value = Number(tankPortInput.value) || 0;
+        setPortOffset(selectedComponent, portId, axis, value);
+        const valueLabel = tankPortInput.closest(".tube-leg-control")?.querySelector(".tube-leg-header strong");
+        if (valueLabel) valueLabel.textContent = `${value > 0 ? "+" : ""}${value} px`;
+        updateVisualPorts(selectedComponent);
+        updateTubing();
+        refreshPorts();
+        return;
+      }
+
       const thicknessInput = event.target.closest("[data-tube-thickness]");
       if (thicknessInput && selectedTubeId) {
         const tube = getTubeById(selectedTubeId);
@@ -6074,6 +6132,16 @@ if (propertiesBody) {
         rotateSelected();
       }
 
+      else if (action === "reset-tank-ports" && selectedComponent?.dataset.type === "tank") {
+        selectedComponent.dataset.portOffsets = "{}";
+        updateVisualPorts(selectedComponent);
+        updateTubing();
+        refreshPorts();
+        renderPropertiesPanel();
+        commitHistory();
+        showHint("Posiciones de puertos restablecidas");
+      }
+
       else if (action === "reset-component-size" && selectedComponent) {
         const base = getComponentDefinitionByType(
           selectedComponent.dataset.type,
@@ -6218,6 +6286,14 @@ function serializeProjectState() {
           return Array.isArray(data) ? data : [];
         } catch (error) {
           return [];
+        }
+      })(),
+      portOffsets: (() => {
+        try {
+          const value = JSON.parse(component.dataset.portOffsets || "{}");
+          return value && typeof value === "object" ? value : {};
+        } catch (error) {
+          return {};
         }
       })(),
       locked: component.dataset.locked === "true"
@@ -6459,6 +6535,10 @@ function restoreProjectState(state) {
       component.dataset.technicalData = JSON.stringify(
         Array.isArray(saved.technicalData) ? saved.technicalData : []
       );
+      component.dataset.portOffsets = JSON.stringify(
+        saved.portOffsets && typeof saved.portOffsets === "object" ? saved.portOffsets : {}
+      );
+      updateVisualPorts(component);
       component.dataset.propertiesTab = "details";
 
       component.dataset.locked =
@@ -6738,29 +6818,7 @@ updateHistoryButtons();
 updateCameraTransform();
 
 
-const tankPropertyObserver = new MutationObserver(() => {
-  if (!selectedComponent || selectedComponent.dataset.type !== "tank") return;
-  if (document.getElementById("tankSizeControls")) return;
-  const panels = [...document.querySelectorAll("aside, .detail-column, [class*='propert']")];
-  const panel = panels.find(el => /SELECCIÓN|Selección/.test(el.textContent || ""));
-  if (!panel) return;
-  const w = Math.round(parseFloat(selectedComponent.style.width) || 180);
-  const h = Math.round(parseFloat(selectedComponent.style.height) || 320);
-  const box = document.createElement("div");
-  box.id = "tankSizeControls";
-  box.className = "tank-size-controls";
-  box.innerHTML = `
-    <div class="tank-size-title">DIMENSIONES DEL TANQUE</div>
-    <label>Ancho <strong>${w} px</strong>
-      <input id="tankWidthControl" type="range" min="100" max="1200" value="${w}">
-    </label>
-    <label>Alto <strong>${h} px</strong>
-      <input id="tankHeightControl" type="range" min="140" max="1400" value="${h}">
-    </label>
-    <small>Los 4 puertos acompañan automáticamente el tamaño del tanque.</small>`;
-  panel.appendChild(box);
-});
-tankPropertyObserver.observe(document.body, {subtree:true, childList:true});
+
 
 
 
