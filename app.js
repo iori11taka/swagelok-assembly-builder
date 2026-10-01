@@ -148,6 +148,20 @@ const componentLibrary = {
     ]
   },
 
+  reliefValve: {
+    name: "Válvula de alivio",
+    image: "assets/VALVULA-ALIVIO.png",
+    className: "reliefValve",
+    width: 220,
+    height: 330,
+    category: "Válvula",
+    connectionLabel: "Entrada inferior + salida lateral derecha",
+    ports: [
+      { id: "bottom", x: 0.53, y: 0.965, direction: 90, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "male" } },
+      { id: "right", x: 0.94, y: 0.66, direction: 0, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } }
+    ]
+  },
+
   gauge: {
     name: "Manómetro PGI",
     image: "assets/PGI.png",
