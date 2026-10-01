@@ -1634,7 +1634,7 @@ function updatePinchZoom() {
   }
 
   const newZoom = Math.max(
-    0.25,
+    0.05,
     Math.min(
       4,
       touchGestureStartZoom *
@@ -1893,6 +1893,10 @@ function createComponent(
 
   component.dataset.rotation =
     "0";
+
+  // Estado de fijación: una pieza fijada no puede arrastrarse.
+  component.dataset.locked =
+    "false";
 
   if (type === "sgrs12") {
     component.dataset.sgrs12Mode = "single";
@@ -3453,6 +3457,11 @@ function enableDragging(component) {
 
     selectComponent(component);
 
+    if (component.dataset.locked === "true") {
+      showHint("Componente fijado · desbloquéalo para moverlo");
+      return;
+    }
+
     /*
       REGLA DE MOVIMIENTO DEL ENSAMBLE
 
@@ -4977,7 +4986,7 @@ function changeZoom(
 
   const newZoom =
     Math.max(
-      0.25,
+      0.05,
       Math.min(
         4,
         oldZoom +
@@ -5371,10 +5380,18 @@ function renderPropertiesPanel() {
 
         <div class="property-actions">
           <button
+            class="property-btn ${selectedComponent.dataset.locked === "true" ? "active" : ""}"
+            type="button"
+            data-property-action="toggle-lock"
+          >
+            ${selectedComponent.dataset.locked === "true" ? "🔒 Fijado" : "🔓 Fijar componente"}
+          </button>
+
+          <button
             class="property-btn"
             type="button"
             data-property-action="rotate"
-            ${componentHasRigidConnections(selectedComponent.dataset.id) ? "disabled" : ""}
+            ${componentHasRigidConnections(selectedComponent.dataset.id) || selectedComponent.dataset.locked === "true" ? "disabled" : ""}
           >
             ↻ Rotar
           </button>
@@ -5849,7 +5866,29 @@ if (propertiesBody) {
       const action =
         actionButton.dataset.propertyAction;
 
-      if (action === "rotate") {
+      if (action === "toggle-lock" && selectedComponent) {
+        const willLock =
+          selectedComponent.dataset.locked !== "true";
+
+        selectedComponent.dataset.locked =
+          willLock ? "true" : "false";
+
+        selectedComponent.classList.toggle(
+          "is-locked",
+          willLock
+        );
+
+        renderPropertiesPanel();
+        commitHistory();
+
+        showHint(
+          willLock
+            ? "Componente fijado"
+            : "Componente desbloqueado"
+        );
+      }
+
+      else if (action === "rotate") {
         rotateSelected();
       }
 
@@ -5990,7 +6029,8 @@ function serializeProjectState() {
       customWidth: component.dataset.customWidth ? Number(component.dataset.customWidth) : null,
       customHeight: component.dataset.customHeight ? Number(component.dataset.customHeight) : null,
       sgrs12Mode: component.dataset.sgrs12Mode || null,
-      customName: component.dataset.customName || null
+      customName: component.dataset.customName || null,
+      locked: component.dataset.locked === "true"
     }));
 
   return {
@@ -6225,6 +6265,14 @@ function restoreProjectState(state) {
       if (saved.customName) {
         component.dataset.customName = saved.customName;
       }
+
+      component.dataset.locked =
+        saved.locked ? "true" : "false";
+
+      component.classList.toggle(
+        "is-locked",
+        Boolean(saved.locked)
+      );
 
       setComponentRotation(
         component,
