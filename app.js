@@ -2345,8 +2345,8 @@ function resizeTankComponent(component, width, height, commit = true) {
   const top = parseFloat(component.style.top) || 0;
   const cx = left + oldW / 2;
   const cy = top + oldH / 2;
-  width = Math.max(100, Math.min(1200, Number(width) || oldW));
-  height = Math.max(140, Math.min(1400, Number(height) || oldH));
+  width = Math.max(100, Math.min(2400, Number(width) || oldW));
+  height = Math.max(140, Math.min(2800, Number(height) || oldH));
   component.dataset.customWidth = String(width);
   component.dataset.customHeight = String(height);
   component.style.width = width + "px";
@@ -5592,7 +5592,7 @@ function renderPropertiesPanel() {
           <input
             type="range"
             min="40"
-            max="900"
+            max="${selectedComponent.dataset.type === "tank" ? 1800 : 900}"
             step="5"
             value="${Math.round(definition.width)}"
             data-component-size="width"
@@ -5607,7 +5607,7 @@ function renderPropertiesPanel() {
           <input
             type="range"
             min="40"
-            max="900"
+            max="${selectedComponent.dataset.type === "tank" ? 1800 : 900}"
             step="5"
             value="${Math.round(definition.height)}"
             data-component-size="height"
