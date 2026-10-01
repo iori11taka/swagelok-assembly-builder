@@ -509,6 +509,34 @@ const componentLibrary = {
     ]
   },
 
+  filter: {
+    name: "Filtro",
+    image: "assets/FILTRO.png",
+    className: "filterComponent",
+    width: 300,
+    height: 200,
+    category: "Filtro",
+    connectionLabel: "OD × OD",
+    ports: [
+      {
+        id: "left",
+        x: 0.018,
+        y: 0.50,
+        direction: 180,
+        tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" }
+      },
+      {
+        id: "right",
+        x: 0.982,
+        y: 0.50,
+        direction: 0,
+        tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" }
+      }
+    ]
+  },
+
   ballValve: {
 
     name:
