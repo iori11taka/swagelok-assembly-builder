@@ -1460,3 +1460,25 @@ body.tube-route-dragging * {
 .canvas-component .selection-box {
   z-index: 30;
 }
+
+
+/* =========================================================
+   SGRS12 · MANÓMETROS SUPERIORES
+   Misma lógica visual del KPR:
+   - el cuerpo del regulador siempre queda delante;
+   - los manómetros conectados quedan detrás;
+   - al arrastrar, la pieza puede subir temporalmente de capa.
+========================================================= */
+.canvas-component.sgrs12,
+.canvas-component.sgrs12.connected {
+  z-index: 60 !important;
+}
+
+.canvas-component.sgrs12.dragging {
+  z-index: 90 !important;
+}
+
+.canvas-component.gauge,
+.canvas-component.gauge.connected {
+  z-index: 30 !important;
+}

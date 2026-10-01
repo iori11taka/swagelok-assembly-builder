@@ -108,8 +108,8 @@ const componentLibrary = {
     height: 458,
     ports: [
       { id: "top", x: 0.50, y: 0.065, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
-      { id: "top-left", x: 0.38, y: 0.14, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
-      { id: "top-right", x: 0.62, y: 0.14, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
+      { id: "top-left", x: 0.38, y: 0.14, direction: 225, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
+      { id: "top-right", x: 0.62, y: 0.14, direction: 315, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
       { id: "left", x: 0.045, y: 0.50, direction: 180, tubingInsertion: 20, connection: { family: "tube", size: "1/4", role: "tube-fitting" } },
       { id: "right", x: 0.955, y: 0.50, direction: 0, tubingInsertion: 20, connection: { family: "tube", size: "1/4", role: "tube-fitting" } }
     ]
