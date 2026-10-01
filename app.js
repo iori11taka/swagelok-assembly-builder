@@ -6171,12 +6171,24 @@ window.addEventListener("DOMContentLoaded", () => {
   </div>`;
   host.appendChild(section);
   const card=section.querySelector('[data-component-type="tank"]');
-  const add=()=>{
-    const r=workspace.getBoundingClientRect();
-    const pt=screenToWorld ? screenToWorld(r.left+r.width/2,r.top+r.height/2) : {x:500,y:400};
-    const c=createComponent("tank",pt.x,pt.y);
-    if(c) commitHistory();
-  };
+const add = () => {
+    const rect = workspace.getBoundingClientRect();
+
+    // Centro visible del área de trabajo convertido
+    // al sistema de coordenadas actual del canvas
+    const x =
+        (workspace.scrollLeft + rect.width / 2) / zoom;
+
+    const y =
+        (workspace.scrollTop + rect.height / 2) / zoom;
+
+    const component = createComponent("tank", x, y);
+
+    if (component) {
+        selectComponent(component);
+        commitHistory();
+    }
+};
   section.querySelector(".tank-add-btn").addEventListener("click",e=>{e.stopPropagation();add();});
   card.addEventListener("dblclick",add);
 });
