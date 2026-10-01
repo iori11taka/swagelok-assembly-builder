@@ -155,10 +155,13 @@ const componentLibrary = {
     width: 220,
     height: 330,
     category: "Válvula",
-    connectionLabel: "Entrada inferior + salida lateral derecha",
+    connectionLabel: "Entrada inferior + salida lateral derecha · tubing directo",
     ports: [
       { id: "bottom", x: 0.53, y: 0.965, direction: 90, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "male" } },
-      { id: "right", x: 0.94, y: 0.66, direction: 0, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } }
+      // Puerto híbrido: permite iniciar/finalizar tubing directamente y también
+      // hacer snap con un componente de 1/4" (por ejemplo 400-1-4).
+      { id: "right", x: 0.94, y: 0.66, direction: 0, tubingInsertion: 12,
+        connection: { family: "tube", size: "1/4", role: "tank-port" } }
     ]
   },
 
