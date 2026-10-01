@@ -2190,8 +2190,8 @@ function resizeTankComponent(component, width, height, commit = true) {
   const top = parseFloat(component.style.top) || 0;
   const cx = left + oldW / 2;
   const cy = top + oldH / 2;
-  width = Math.max(100, Math.min(600, Number(width) || oldW));
-  height = Math.max(140, Math.min(700, Number(height) || oldH));
+  width = Math.max(100, Math.min(1200, Number(width) || oldW));
+  height = Math.max(140, Math.min(1400, Number(height) || oldH));
   component.dataset.customWidth = String(width);
   component.dataset.customHeight = String(height);
   component.style.width = width + "px";
@@ -4497,11 +4497,32 @@ function getComponentDefinition(
     return null;
   }
 
-  return getComponentDefinitionByType(
+  const definition = getComponentDefinitionByType(
     component.dataset.type,
     component.dataset.view ||
       null
   );
+
+  if (!definition) {
+    return null;
+  }
+
+  // Los componentes redimensionables (actualmente el tanque) deben usar
+  // sus dimensiones reales para calcular puertos, snap y tubing.
+  // Antes se seguian usando 180 x 320 aunque la imagen cambiara de tamano,
+  // por eso los puntos de conexion quedaban desalineados.
+  if (component.dataset.type === "tank") {
+    const customWidth = parseFloat(component.dataset.customWidth || component.style.width);
+    const customHeight = parseFloat(component.dataset.customHeight || component.style.height);
+
+    return {
+      ...definition,
+      width: Number.isFinite(customWidth) ? customWidth : definition.width,
+      height: Number.isFinite(customHeight) ? customHeight : definition.height
+    };
+  }
+
+  return definition;
 }
 
 function getComponentById(id) {
@@ -6145,10 +6166,10 @@ const tankPropertyObserver = new MutationObserver(() => {
   box.innerHTML = `
     <div class="tank-size-title">DIMENSIONES DEL TANQUE</div>
     <label>Ancho <strong>${w} px</strong>
-      <input id="tankWidthControl" type="range" min="100" max="600" value="${w}">
+      <input id="tankWidthControl" type="range" min="100" max="1200" value="${w}">
     </label>
     <label>Alto <strong>${h} px</strong>
-      <input id="tankHeightControl" type="range" min="140" max="700" value="${h}">
+      <input id="tankHeightControl" type="range" min="140" max="1400" value="${h}">
     </label>
     <small>Los 4 puertos acompañan automáticamente el tamaño del tanque.</small>`;
   panel.appendChild(box);
