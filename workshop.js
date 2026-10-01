@@ -59,10 +59,18 @@
    active=projects.find(p=>p.id===saved.active)||projects[0]||null;
   }
  }catch{
-  storageBlocked=true;
+  // A previous version may have left an incompatible local project.
+  // Preserve the raw value as a recovery copy, then let the current
+  // version start normally instead of permanently blocking local saves.
+  const raw=localStorage.getItem(KEY);
+  if(raw){
+   try{localStorage.setItem(KEY+'-recovery-'+Date.now(),raw);}catch{}
+  }
+  try{localStorage.removeItem(KEY);}catch{}
+  storageBlocked=false;
   projects=[];
   active=null;
-  setTimeout(()=>notify('No se pudo leer el archivo local. Conservamos los datos existentes; exporta tu nuevo trabajo como respaldo.'),500);
+  setTimeout(()=>notify('Se actualizó el almacenamiento local para esta versión.'),500);
  }
 
  /*
