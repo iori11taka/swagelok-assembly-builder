@@ -160,7 +160,7 @@ const componentLibrary = {
       { id: "bottom", x: 0.53, y: 0.965, direction: 90, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "male" } },
       // Puerto híbrido: permite iniciar/finalizar tubing directamente y también
       // hacer snap con un componente de 1/4" (por ejemplo 400-1-4).
-      { id: "right", x: 1.045, y: 0.66, direction: 0, tubingInsertion: 0,
+      { id: "right", x: 0.878, y: 0.66, direction: 0, tubingInsertion: 0,
         connection: { family: "tube", size: "1/4", role: "tank-port" } }
     ]
   },
@@ -512,7 +512,7 @@ const componentLibrary = {
   ballValve: {
 
     name:
-      "SS-43GS4",
+      "SERIE-40",
 
     className:
       "ballValve",
@@ -521,7 +521,7 @@ const componentLibrary = {
       "c2",
 
     category:
-      "Válvula de bola",
+      "Ball Valve",
 
     connectionLabel:
       '1/4" Swagelok OD × 1/4" Swagelok OD',
@@ -3954,9 +3954,16 @@ function positionComponentForConnection(
       rotation
     );
 
-  const insertion =
-    sourcePort.insertionDepth ||
-    0;
+  // La válvula de alivio ya muestra físicamente su conexión lateral completa.
+  // No debemos "enterrar" visualmente la pieza conectada dentro de la válvula,
+  // aunque el otro componente tenga insertionDepth (p. ej. 400-1-4).
+  const involvesReliefValve =
+    sourceComponent.dataset.type === "reliefValve" ||
+    targetComponent.dataset.type === "reliefValve";
+
+  const insertion = involvesReliefValve
+    ? 0
+    : (sourcePort.insertionDepth || 0);
 
   const inward =
     directionVector(
@@ -5802,7 +5809,7 @@ function getComponentCategoryName(type) {
     adapter400: "Conector",
     union400: "Tube Fitting",
     needleValve: "Válvula de aguja",
-    ballValve: "Válvula de bola",
+    ballValve: "Ball Valve",
     unionTee400: "Unión tee"
   };
 
