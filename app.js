@@ -128,6 +128,26 @@ const componentLibrary = {
     ]
   },
 
+  ssi3: {
+    name: "SSI 3 botellas",
+    image: "assets/SSI-3-BOTELLAS.png",
+    className: "ssi3",
+    width: 420,
+    height: 420,
+    category: "Sistema de suministro",
+    connectionLabel: "1 salida derecha · conexión directa a tubing",
+    ports: [
+      {
+        id: "right",
+        x: 0.965,
+        y: 0.125,
+        direction: 0,
+        tubingInsertion: 18,
+        connection: { family: "tube", size: "1/4", role: "tube-fitting" }
+      }
+    ]
+  },
+
   gauge: {
     name: "Manómetro PGI",
     image: "assets/PGI.png",
@@ -4023,10 +4043,15 @@ function getPortWorldPoint(
     ) *
     definition.height;
 
+  // El punto mundial debe usar exactamente el mismo offset manual que el
+  // indicador visual del puerto. De lo contrario el puerto se mueve en la UI,
+  // pero el extremo del tubing permanece en la coordenada original.
+  const portOffset = getPortOffset(component, port.id);
+
   const rotated =
     rotateVector(
-      localX,
-      localY,
+      localX + portOffset.x,
+      localY + portOffset.y,
       Number(
         component.dataset.rotation ||
         0
@@ -5755,6 +5780,7 @@ function getComponentCategoryName(type) {
     regulator: "Regulador",
     klf: "Regulador",
     sgrs12: "Regulador",
+    ssi3: "Sistema de suministro",
     gauge: "Instrumentación",
     adapter400: "Conector",
     union400: "Tube Fitting",
