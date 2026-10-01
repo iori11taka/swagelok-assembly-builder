@@ -312,7 +312,7 @@ const componentLibrary = {
       "0,37",
 
     connectionLabel:
-      '1/4" Swagelok OD × 1/4" Swagelok OD',
+      'Tube fitting × Tube fitting',
 
     views: {
 
@@ -524,7 +524,7 @@ const componentLibrary = {
       "Ball Valve",
 
     connectionLabel:
-      '1/4" Swagelok OD × 1/4" Swagelok OD',
+      'Tube fitting × Tube fitting',
 
     views: {
 
@@ -724,7 +724,7 @@ const componentLibrary = {
       "Tube Fitting",
 
     connectionLabel:
-      '1/4" Swagelok OD × 1/4" Swagelok OD × 1/4" Swagelok OD',
+      'Tube fitting de 3 vías',
 
     ports: [
 
@@ -2506,7 +2506,7 @@ function handleTubingPortClick(component, portDefinition, portElement) {
   cancelTubingStart();
   updateTubing();
 
-  showHint(`Tubing ${connection.size}" OD · ${getTubeShapeName(selectedTubeShape)}`);
+  showHint(`Tubing · ${getTubeShapeName(selectedTubeShape)}`);
 }
 
 function cancelTubingStart() {
@@ -3954,16 +3954,24 @@ function positionComponentForConnection(
       rotation
     );
 
-  // La válvula de alivio ya muestra físicamente su conexión lateral completa.
-  // No debemos "enterrar" visualmente la pieza conectada dentro de la válvula,
-  // aunque el otro componente tenga insertionDepth (p. ej. 400-1-4).
-  const involvesReliefValve =
-    sourceComponent.dataset.type === "reliefValve" ||
-    targetComponent.dataset.type === "reliefValve";
+  // En una unión NPT el extremo macho debe penetrar visualmente en el
+  // componente hembra. La profundidad pertenece al puerto macho, sin
+  // importar cuál de las dos piezas fue la que el usuario arrastró.
+  const sourceIsMaleNpt =
+    sourcePort.connection?.family === "thread" &&
+    sourcePort.connection?.standard === "NPT" &&
+    sourcePort.connection?.gender === "male";
 
-  const insertion = involvesReliefValve
-    ? 0
-    : (sourcePort.insertionDepth || 0);
+  const targetIsMaleNpt =
+    targetPort.connection?.family === "thread" &&
+    targetPort.connection?.standard === "NPT" &&
+    targetPort.connection?.gender === "male";
+
+  const insertion = sourceIsMaleNpt
+    ? (sourcePort.insertionDepth ?? 22)
+    : targetIsMaleNpt
+      ? (targetPort.insertionDepth ?? 22)
+      : 0;
 
   const inward =
     directionVector(
@@ -4858,18 +4866,14 @@ function formatConnection(
         ? "MNPT"
         : "FNPT";
 
-    return (
-      `${connection.size}" ${gender}`
-    );
+    return gender;
   }
 
   if (
     connection.family ===
     "tube"
   ) {
-    return (
-      `${connection.size}" Tube`
-    );
+    return "Tube fitting";
   }
 
   return "Conexión";
@@ -5617,7 +5621,7 @@ function renderPropertiesPanel() {
     );
 
     propertiesTitle.textContent =
-      `Tubing ${tube.size}" OD`;
+      `Tubing`;
 
     propertiesBody.innerHTML = `
       <div class="property-block">
