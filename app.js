@@ -1907,6 +1907,12 @@ function createComponent(
   component.dataset.customHeight = String(definition.height);
   component.dataset.customName = baseDefinition.name || definition.name || type;
 
+  // Datos técnicos libres por componente.
+  // Se guardan como JSON en el propio componente para que cada pieza
+  // pueda tener campos distintos sin dejar filas vacías obligatorias.
+  component.dataset.technicalData = "[]";
+  component.dataset.propertiesTab = "details";
+
   if (
     baseDefinition.views
   ) {
@@ -5207,7 +5213,71 @@ function renderPropertiesPanel() {
         `;
       }).join("");
 
+    const activePropertiesTab =
+      selectedComponent.dataset.propertiesTab || "details";
+
+    let technicalData = [];
+    try {
+      technicalData = JSON.parse(
+        selectedComponent.dataset.technicalData || "[]"
+      );
+      if (!Array.isArray(technicalData)) technicalData = [];
+    } catch (error) {
+      technicalData = [];
+    }
+
+    const technicalRowsHtml = technicalData.length
+      ? technicalData.map((item, index) => `
+          <div class="technical-data-row" data-technical-row="${index}">
+            <input
+              class="property-text-input technical-key"
+              type="text"
+              value="${escapeHtml(item.label || "")}"
+              placeholder="Dato, ej. Material"
+              data-technical-key="${index}"
+            >
+            <input
+              class="property-text-input technical-value"
+              type="text"
+              value="${escapeHtml(item.value || "")}"
+              placeholder="Valor"
+              data-technical-value="${index}"
+            >
+            <button
+              type="button"
+              class="technical-delete-btn"
+              data-technical-delete="${index}"
+              title="Eliminar dato"
+              aria-label="Eliminar dato"
+            >×</button>
+          </div>
+        `).join("")
+      : `
+          <div class="technical-empty">
+            Aún no hay datos técnicos para esta pieza.
+            Agrega únicamente la información que necesites.
+          </div>
+        `;
+
     propertiesBody.innerHTML = `
+      <div class="properties-tabs" role="tablist">
+        <button
+          type="button"
+          class="properties-tab ${activePropertiesTab === "details" ? "active" : ""}"
+          data-properties-tab="details"
+        >
+          Detalle de la pieza
+        </button>
+        <button
+          type="button"
+          class="properties-tab ${activePropertiesTab === "technical" ? "active" : ""}"
+          data-properties-tab="technical"
+        >
+          Datos técnicos
+        </button>
+      </div>
+
+      <div class="properties-tab-content ${activePropertiesTab === "details" ? "active" : ""}" data-properties-panel="details">
       <div class="property-block">
         <div class="property-label">Tipo</div>
         <div class="property-value">
@@ -5400,6 +5470,26 @@ function renderPropertiesPanel() {
             🗑 Eliminar
           </button>
         </div>
+      </div>
+      </div>
+
+      <div class="properties-tab-content ${activePropertiesTab === "technical" ? "active" : ""}" data-properties-panel="technical">
+        <div class="technical-data-intro">
+          Agrega, edita o elimina los datos que correspondan a esta pieza.
+          No existen campos obligatorios.
+        </div>
+
+        <div class="technical-data-list">
+          ${technicalRowsHtml}
+        </div>
+
+        <button
+          type="button"
+          class="property-btn technical-add-btn"
+          data-technical-add
+        >
+          + Agregar dato
+        </button>
       </div>
     `;
 
@@ -5645,6 +5735,34 @@ if (propertiesBody) {
   propertiesBody.addEventListener(
     "input",
     event => {
+      const technicalKeyInput = event.target.closest("[data-technical-key]");
+      const technicalValueInput = event.target.closest("[data-technical-value]");
+
+      if ((technicalKeyInput || technicalValueInput) && selectedComponent) {
+        let data = [];
+        try {
+          data = JSON.parse(selectedComponent.dataset.technicalData || "[]");
+          if (!Array.isArray(data)) data = [];
+        } catch (error) {
+          data = [];
+        }
+
+        const input = technicalKeyInput || technicalValueInput;
+        const index = Number(
+          technicalKeyInput
+            ? technicalKeyInput.dataset.technicalKey
+            : technicalValueInput.dataset.technicalValue
+        );
+
+        if (!data[index]) data[index] = { label: "", value: "" };
+
+        if (technicalKeyInput) data[index].label = input.value;
+        if (technicalValueInput) data[index].value = input.value;
+
+        selectedComponent.dataset.technicalData = JSON.stringify(data);
+        return;
+      }
+
       const nameInput = event.target.closest("[data-component-custom-name]");
       if (nameInput && selectedComponent) {
         selectedComponent.dataset.customName = nameInput.value;
@@ -5748,6 +5866,14 @@ if (propertiesBody) {
     "change",
     event => {
       if (
+        event.target.closest("[data-technical-key]") ||
+        event.target.closest("[data-technical-value]")
+      ) {
+        commitHistory();
+        return;
+      }
+
+      if (
         event.target.closest("[data-tube-leg]") ||
         event.target.closest("[data-tube-thickness]") ||
         event.target.closest("[data-component-size]") ||
@@ -5762,6 +5888,53 @@ if (propertiesBody) {
   propertiesBody.addEventListener(
     "click",
     event => {
+      const tabButton = event.target.closest("[data-properties-tab]");
+      if (tabButton && selectedComponent) {
+        selectedComponent.dataset.propertiesTab =
+          tabButton.dataset.propertiesTab || "details";
+        renderPropertiesPanel();
+        return;
+      }
+
+      const addTechnicalButton = event.target.closest("[data-technical-add]");
+      if (addTechnicalButton && selectedComponent) {
+        let data = [];
+        try {
+          data = JSON.parse(selectedComponent.dataset.technicalData || "[]");
+          if (!Array.isArray(data)) data = [];
+        } catch (error) {
+          data = [];
+        }
+        data.push({ label: "", value: "" });
+        selectedComponent.dataset.technicalData = JSON.stringify(data);
+        selectedComponent.dataset.propertiesTab = "technical";
+        renderPropertiesPanel();
+        const inputs = propertiesBody.querySelectorAll(".technical-data-row input");
+        if (inputs.length) inputs[inputs.length - 2]?.focus();
+        commitHistory();
+        return;
+      }
+
+      const deleteTechnicalButton = event.target.closest("[data-technical-delete]");
+      if (deleteTechnicalButton && selectedComponent) {
+        let data = [];
+        try {
+          data = JSON.parse(selectedComponent.dataset.technicalData || "[]");
+          if (!Array.isArray(data)) data = [];
+        } catch (error) {
+          data = [];
+        }
+        const index = Number(deleteTechnicalButton.dataset.technicalDelete);
+        if (Number.isInteger(index) && index >= 0 && index < data.length) {
+          data.splice(index, 1);
+          selectedComponent.dataset.technicalData = JSON.stringify(data);
+          selectedComponent.dataset.propertiesTab = "technical";
+          renderPropertiesPanel();
+          commitHistory();
+        }
+        return;
+      }
+
       const sgrs12ModeButton =
         event.target.closest(
           "[data-sgrs12-mode]"
@@ -6026,6 +6199,14 @@ function serializeProjectState() {
       customHeight: component.dataset.customHeight ? Number(component.dataset.customHeight) : null,
       sgrs12Mode: component.dataset.sgrs12Mode || null,
       customName: component.dataset.customName || null,
+      technicalData: (() => {
+        try {
+          const data = JSON.parse(component.dataset.technicalData || "[]");
+          return Array.isArray(data) ? data : [];
+        } catch (error) {
+          return [];
+        }
+      })(),
       locked: component.dataset.locked === "true"
     }));
 
@@ -6261,6 +6442,11 @@ function restoreProjectState(state) {
       if (saved.customName) {
         component.dataset.customName = saved.customName;
       }
+
+      component.dataset.technicalData = JSON.stringify(
+        Array.isArray(saved.technicalData) ? saved.technicalData : []
+      );
+      component.dataset.propertiesTab = "details";
 
       component.dataset.locked =
         saved.locked ? "true" : "false";
