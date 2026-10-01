@@ -100,6 +100,19 @@ const componentLibrary = {
     ]
   },
 
+  klf: {
+    name: "Regulador KLF",
+    image: "assets/KPR1.png",
+    className: "regulator",
+    width: 230,
+    height: 230,
+    ports: [
+      { id: "top", x: 0.50, y: 0.12, direction: 270, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
+      { id: "left", x: 0.055, y: 0.50, direction: 180, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } },
+      { id: "right", x: 0.945, y: 0.50, direction: 0, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "female" } }
+    ]
+  },
+
   sgrs12: {
     name: "SGRS12",
     image: "assets/SGRS12.png",
@@ -796,7 +809,7 @@ workspace.addEventListener("drop", event => {
   const point = screenToCanvas(event.clientX, event.clientY);
   const component = createComponent(type, point.x, point.y);
 
-  if (component && !["regulator", "sgrs12"].includes(type) && snapToggle.checked) {
+  if (component && !["regulator", "klf", "sgrs12"].includes(type) && snapToggle.checked) {
     trySnapComponent(component, true);
   }
 });
@@ -1122,8 +1135,7 @@ document.addEventListener(
 
         if (
           component &&
-          dragData.type !==
-            "regulator" &&
+          ! ["regulator", "klf", "sgrs12"].includes(dragData.type) &&
           snapToggle.checked
         ) {
           trySnapComponent(
@@ -3486,7 +3498,7 @@ function enableDragging(component) {
     draggingRigidGroup =
       hasRigidConnections &&
       (
-        ["regulator", "sgrs12"].includes(component.dataset.type) ||
+        ["regulator", "klf", "sgrs12"].includes(component.dataset.type) ||
         event.shiftKey
       );
 
@@ -5697,6 +5709,7 @@ function getPortDisplayName(portId) {
 function getComponentCategoryName(type) {
   const labels = {
     regulator: "Regulador",
+    klf: "Regulador",
     sgrs12: "Regulador",
     gauge: "Instrumentación",
     adapter400: "Conector",
