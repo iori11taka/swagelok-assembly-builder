@@ -429,14 +429,17 @@ const componentLibrary = {
     category: "Tanque / Recipiente",
     connectionLabel: "4 puertos configurables · superior / inferior / laterales",
     ports: [
+      // Puertos funcionales del tanque. Los laterales se ubican en la zona
+      // superior del recipiente (hombros), tal como se muestra en la imagen.
+      // role: tank-port permite conectar tanto tubing como componentes de 1/4".
       { id:"top", x:0.5, y:0.015, direction:270, tubingInsertion:18,
-        connection:{ family:"tube", size:"1/4", role:"tube-fitting" } },
-      { id:"right", x:0.985, y:0.5, direction:0, tubingInsertion:18,
-        connection:{ family:"tube", size:"1/4", role:"tube-fitting" } },
+        connection:{ family:"tube", size:"1/4", role:"tank-port" } },
+      { id:"right", x:0.985, y:0.245, direction:0, tubingInsertion:18,
+        connection:{ family:"tube", size:"1/4", role:"tank-port" } },
       { id:"bottom", x:0.5, y:0.985, direction:90, tubingInsertion:18,
-        connection:{ family:"tube", size:"1/4", role:"tube-fitting" } },
-      { id:"left", x:0.015, y:0.5, direction:180, tubingInsertion:18,
-        connection:{ family:"tube", size:"1/4", role:"tube-fitting" } }
+        connection:{ family:"tube", size:"1/4", role:"tank-port" } },
+      { id:"left", x:0.015, y:0.245, direction:180, tubingInsertion:18,
+        connection:{ family:"tube", size:"1/4", role:"tank-port" } }
     ]
   },
 
@@ -3580,6 +3583,19 @@ function enableDragging(component) {
 function areConnectionsCompatible(a, b) {
   if (!a || !b) return false;
   if (a.size !== b.size) return false;
+
+  // Los cuatro puertos del tanque son configurables. Además de aceptar
+  // tubing de 1/4", pueden recibir directamente un componente de 1/4"
+  // (Tube Fitting o conexión roscada). Esto hace que top/right/bottom/left
+  // se comporten como puntos de snap reales y queden registrados como
+  // conexiones ocupadas al insertar una pieza.
+  const aIsTankPort = a.role === "tank-port";
+  const bIsTankPort = b.role === "tank-port";
+  if (aIsTankPort || bIsTankPort) {
+    const other = aIsTankPort ? b : a;
+    return other.family === "tube" || other.family === "thread";
+  }
+
   if (a.family !== b.family) return false;
 
   if (a.family === "thread") {
