@@ -429,16 +429,17 @@ const componentLibrary = {
     category: "Tanque / Recipiente",
     connectionLabel: "4 puertos configurables · superior / inferior / laterales",
     ports: [
-      // Puertos funcionales del tanque. Los laterales se ubican en la zona
-      // superior del recipiente (hombros), tal como se muestra en la imagen.
+      // Puertos funcionales del tanque. Los laterales siguen el borde REAL del
+      // cilindro dentro del PNG (aprox. 30%-70% del ancho), no el borde
+      // transparente de la imagen. Así permanecen pegados al tanque al redimensionar.
       // role: tank-port permite conectar tanto tubing como componentes de 1/4".
       { id:"top", x:0.5, y:0.015, direction:270, tubingInsertion:18,
         connection:{ family:"tube", size:"1/4", role:"tank-port" } },
-      { id:"right", x:0.985, y:0.245, direction:0, tubingInsertion:18,
+      { id:"right", x:0.700, y:0.245, direction:0, tubingInsertion:18,
         connection:{ family:"tube", size:"1/4", role:"tank-port" } },
       { id:"bottom", x:0.5, y:0.985, direction:90, tubingInsertion:18,
         connection:{ family:"tube", size:"1/4", role:"tank-port" } },
-      { id:"left", x:0.015, y:0.245, direction:180, tubingInsertion:18,
+      { id:"left", x:0.300, y:0.245, direction:180, tubingInsertion:18,
         connection:{ family:"tube", size:"1/4", role:"tank-port" } }
     ]
   },
