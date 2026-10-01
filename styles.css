@@ -1391,3 +1391,16 @@ body.tube-route-dragging * {
     r: 13px;
   }
 }
+
+/* Tanque redimensionable */
+.canvas-component.tankComponent .component-visual img{
+  width:100%; height:100%; object-fit:fill; display:block;
+}
+.tank-size-controls{
+  margin-top:18px; padding-top:16px; border-top:1px solid #d9e3ea;
+  display:grid; gap:12px;
+}
+.tank-size-title{font-size:12px;font-weight:800;letter-spacing:.08em;color:#627b8b}
+.tank-size-controls label{display:grid;grid-template-columns:1fr auto;gap:7px;font-size:14px}
+.tank-size-controls input{grid-column:1/-1;width:100%;accent-color:#1286c8}
+.tank-size-controls small{color:#6b7f8c;line-height:1.4}

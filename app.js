@@ -419,6 +419,27 @@ const componentLibrary = {
 
   },
 
+  tank: {
+    name: "Tanque",
+    image: "assets/TANK.png",
+    className: "tankComponent",
+    width: 180,
+    height: 320,
+    resizable: true,
+    category: "Tanque / Recipiente",
+    connectionLabel: "4 puertos configurables · superior / inferior / laterales",
+    ports: [
+      { id:"top", x:0.5, y:0.015, direction:270, tubingInsertion:18,
+        connection:{ family:"tube", size:"1/4", role:"tube-fitting" } },
+      { id:"right", x:0.985, y:0.5, direction:0, tubingInsertion:18,
+        connection:{ family:"tube", size:"1/4", role:"tube-fitting" } },
+      { id:"bottom", x:0.5, y:0.985, direction:90, tubingInsertion:18,
+        connection:{ family:"tube", size:"1/4", role:"tube-fitting" } },
+      { id:"left", x:0.015, y:0.5, direction:180, tubingInsertion:18,
+        connection:{ family:"tube", size:"1/4", role:"tube-fitting" } }
+    ]
+  },
+
   ballValve: {
 
     name:
@@ -1854,6 +1875,11 @@ function createComponent(
   component.dataset.rotation =
     "0";
 
+  if (definition.resizable) {
+    component.dataset.customWidth = String(definition.width);
+    component.dataset.customHeight = String(definition.height);
+  }
+
   if (
     baseDefinition.views
   ) {
@@ -2154,6 +2180,40 @@ function selectTube(tubeId) {
 
   renderPropertiesPanel();
 }
+
+
+function resizeTankComponent(component, width, height, commit = true) {
+  if (!component || component.dataset.type !== "tank") return;
+  const oldW = parseFloat(component.style.width) || 180;
+  const oldH = parseFloat(component.style.height) || 320;
+  const left = parseFloat(component.style.left) || 0;
+  const top = parseFloat(component.style.top) || 0;
+  const cx = left + oldW / 2;
+  const cy = top + oldH / 2;
+  width = Math.max(100, Math.min(600, Number(width) || oldW));
+  height = Math.max(140, Math.min(700, Number(height) || oldH));
+  component.dataset.customWidth = String(width);
+  component.dataset.customHeight = String(height);
+  component.style.width = width + "px";
+  component.style.height = height + "px";
+  component.style.left = (cx - width / 2) + "px";
+  component.style.top = (cy - height / 2) + "px";
+  updateVisualPorts(component);
+  updateTubing();
+  refreshPorts();
+  if (commit && !isRestoringState) commitHistory();
+}
+
+document.addEventListener("input", event => {
+  if (!selectedComponent || selectedComponent.dataset.type !== "tank") return;
+  if (event.target.id === "tankWidthControl")
+    resizeTankComponent(selectedComponent, event.target.value, parseFloat(selectedComponent.style.height), false);
+  if (event.target.id === "tankHeightControl")
+    resizeTankComponent(selectedComponent, parseFloat(selectedComponent.style.width), event.target.value, false);
+});
+document.addEventListener("change", event => {
+  if (event.target.id === "tankWidthControl" || event.target.id === "tankHeightControl") commitHistory();
+});
 
 workspace.addEventListener("pointerdown", event => {
   if (currentTool !== "select") return;
@@ -5574,7 +5634,9 @@ function serializeProjectState() {
 
       view:
         component.dataset.view ||
-        null
+        null,
+      customWidth: component.dataset.customWidth ? Number(component.dataset.customWidth) : null,
+      customHeight: component.dataset.customHeight ? Number(component.dataset.customHeight) : null
     }));
 
   return {
@@ -5792,6 +5854,13 @@ function restoreProjectState(state) {
 
       component.style.top =
         `${saved.top}px`;
+
+      if (saved.type === "tank" && saved.customWidth && saved.customHeight) {
+        component.dataset.customWidth = String(saved.customWidth);
+        component.dataset.customHeight = String(saved.customHeight);
+        component.style.width = `${saved.customWidth}px`;
+        component.style.height = `${saved.customHeight}px`;
+      }
 
       setComponentRotation(
         component,
@@ -6060,3 +6129,54 @@ commitHistory(true);
 updateHistoryButtons();
 
 updateCameraTransform();
+
+
+const tankPropertyObserver = new MutationObserver(() => {
+  if (!selectedComponent || selectedComponent.dataset.type !== "tank") return;
+  if (document.getElementById("tankSizeControls")) return;
+  const panels = [...document.querySelectorAll("aside, .detail-column, [class*='propert']")];
+  const panel = panels.find(el => /SELECCIÓN|Selección/.test(el.textContent || ""));
+  if (!panel) return;
+  const w = Math.round(parseFloat(selectedComponent.style.width) || 180);
+  const h = Math.round(parseFloat(selectedComponent.style.height) || 320);
+  const box = document.createElement("div");
+  box.id = "tankSizeControls";
+  box.className = "tank-size-controls";
+  box.innerHTML = `
+    <div class="tank-size-title">DIMENSIONES DEL TANQUE</div>
+    <label>Ancho <strong>${w} px</strong>
+      <input id="tankWidthControl" type="range" min="100" max="600" value="${w}">
+    </label>
+    <label>Alto <strong>${h} px</strong>
+      <input id="tankHeightControl" type="range" min="140" max="700" value="${h}">
+    </label>
+    <small>Los 4 puertos acompañan automáticamente el tamaño del tanque.</small>`;
+  panel.appendChild(box);
+});
+tankPropertyObserver.observe(document.body, {subtree:true, childList:true});
+
+
+
+window.addEventListener("DOMContentLoaded", () => {
+  const lists = [...document.querySelectorAll(".component-list, .library-list, aside, [class*='component']")];
+  const host = lists.find(el => /SS-43GS4|SS-400-3/.test(el.textContent || ""));
+  if (!host || document.querySelector('[data-component-type="tank"]')) return;
+  const section = document.createElement("div");
+  section.className = "tank-library-entry";
+  section.innerHTML = `<div style="margin:18px 10px 8px;font-size:12px;font-weight:800;letter-spacing:.08em;color:#718797">RECIPIENTES</div>
+  <div class="component-card" data-component-type="tank" draggable="true" style="display:flex;align-items:center;gap:12px;padding:12px;margin:0 8px 12px;border:1px solid #d9e3ea;border-radius:10px;cursor:grab;background:#fff">
+    <img src="assets/TANK.png" alt="Tanque" style="width:54px;height:74px;object-fit:contain">
+    <div><strong>Tanque</strong><div style="font-size:12px;color:#657b89;margin-top:4px">4 puertos · tamaño ajustable</div></div>
+    <button type="button" class="tank-add-btn" style="margin-left:auto">+</button>
+  </div>`;
+  host.appendChild(section);
+  const card=section.querySelector('[data-component-type="tank"]');
+  const add=()=>{
+    const r=workspace.getBoundingClientRect();
+    const pt=screenToWorld ? screenToWorld(r.left+r.width/2,r.top+r.height/2) : {x:500,y:400};
+    const c=createComponent("tank",pt.x,pt.y);
+    if(c) commitHistory();
+  };
+  section.querySelector(".tank-add-btn").addEventListener("click",e=>{e.stopPropagation();add();});
+  card.addEventListener("dblclick",add);
+});
