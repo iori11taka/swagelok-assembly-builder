@@ -159,7 +159,12 @@ const componentLibrary = {
     category: "Válvula",
     connectionLabel: "Entrada inferior + salida lateral derecha · tubing directo",
     ports: [
-      { id: "bottom", x: 0.53, y: 0.965, direction: 90, connection: { family: "thread", standard: "NPT", size: "1/4", gender: "male" } },
+      // Puerto inferior híbrido: el extremo visual es una rosca macho, pero en el
+      // editor debe funcionar también como punto de entrada/salida de tubing y
+      // como punto de snap para componentes de 1/4". El role tank-port reutiliza
+      // la compatibilidad híbrida ya usada por el tanque.
+      { id: "bottom", x: 0.526, y: 0.985, direction: 90, tubingInsertion: 0,
+        connection: { family: "tube", size: "1/4", role: "tank-port" } },
       // Puerto híbrido: permite iniciar/finalizar tubing directamente y también
       // hacer snap con un componente de 1/4" (por ejemplo 400-1-4).
       { id: "right", x: 0.878, y: 0.66, direction: 0, tubingInsertion: 0,
