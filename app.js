@@ -774,6 +774,31 @@ const componentLibrary = {
 
   },
 
+  tubeInTubeHeatExchanger: {
+    name: "Intercambiador tubo en tubo",
+    image: "assets/INTERCAMBIADOR-TUBO-TUBO.png",
+    className: "tubeInTubeHeatExchanger",
+    width: 420,
+    height: 233,
+    category: "Intercambiador",
+    connectionLabel: "5 puertos OD visibles · circuito interno y circuito exterior",
+    ports: [
+      // Circuito interno (tubo recto rojo)
+      { id: "process-left", x: 0.025, y: 0.520, direction: 180, tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" } },
+      { id: "process-right", x: 0.975, y: 0.520, direction: 0, tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" } },
+
+      // Conexiones visibles del circuito exterior/anular
+      { id: "shell-top-left", x: 0.220, y: 0.205, direction: 270, tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" } },
+      { id: "shell-top-right", x: 0.800, y: 0.205, direction: 270, tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" } },
+      { id: "shell-bottom-right", x: 0.800, y: 0.825, direction: 90, tubingInsertion: 18,
+        connection: { family: "tube", role: "tube-fitting" } }
+    ]
+  },
+
   actuatedBallValve: {
     name: "Válvula de bola con actuador neumático",
     image: "assets/VALVULA-BOLA-ACTUADOR.png",
@@ -5951,6 +5976,7 @@ function getComponentCategoryName(type) {
     needleValve: "Válvula de aguja",
     ballValve: "Ball Valve",
     actuatedBallValve: "Válvula de bola actuada",
+    tubeInTubeHeatExchanger: "Intercambiador tubo en tubo",
     unionTee400: "Unión tee"
   };
 
