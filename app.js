@@ -774,6 +774,22 @@ const componentLibrary = {
 
   },
 
+  actuatedBallValve: {
+    name: "Válvula de bola con actuador neumático",
+    image: "assets/VALVULA-BOLA-ACTUADOR.png",
+    className: "actuatedBallValve",
+    width: 300,
+    height: 256,
+    category: "Válvula",
+    connectionLabel: "Tube fitting OD × Tube fitting OD",
+    ports: [
+      { id: "tube-left", x: 0.175, y: 0.805, direction: 180, tubingInsertion: 18,
+        connection: { family: "tube", size: "1/4", role: "tube-fitting" } },
+      { id: "tube-right", x: 0.735, y: 0.805, direction: 0, tubingInsertion: 18,
+        connection: { family: "tube", size: "1/4", role: "tube-fitting" } }
+    ]
+  },
+
   unionTee400: {
 
     name:
@@ -5934,6 +5950,7 @@ function getComponentCategoryName(type) {
     union400: "Tube Fitting",
     needleValve: "Válvula de aguja",
     ballValve: "Ball Valve",
+    actuatedBallValve: "Válvula de bola actuada",
     unionTee400: "Unión tee"
   };
 
