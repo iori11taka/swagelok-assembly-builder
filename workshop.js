@@ -1,10 +1,10 @@
 'use strict';
 // Product shell; the supplied geometry and interaction engine remains in app.js.
 (function(){
- const $=id=>document.getElementById(id),KEY='taller-visual-projects-v1';let projects=[],active=null,dialogMode='',toastTimer,ready=false,storageBlocked=false,cloudTimer=null;
+ const $=id=>document.getElementById(id),KEY='taller-visual-projects-v1',BACKUP_KEY='taller-visual-projects-backup-v1';let projects=[],active=null,dialogMode='',toastTimer,ready=false,cloudTimer=null;
  function notify(message){$('workshopToast').textContent=message;$('workshopToast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('workshopToast').style.display='none',4500);}
  function current(){return {...active,state:serializeProjectState()};}
- function persist(){if(!ready||!active)return;active.state=serializeProjectState();active.updated=new Date().toISOString();scheduleCloudSave();if(storageBlocked){$('storageStatus').textContent='Archivo local dañado · exporta una copia';return;}try{localStorage.setItem(KEY,JSON.stringify({active:active.id,projects}));$('storageStatus').textContent='Guardado en este dispositivo';}catch{$('storageStatus').textContent='Sin guardar · exporta una copia';notify('No se pudo guardar en este navegador. Exporta una copia del proyecto.');}}
+ function persist(){if(!ready||!active)return;active.state=serializeProjectState();active.updated=new Date().toISOString();scheduleCloudSave();try{const payload=JSON.stringify({active:active.id,projects});localStorage.setItem(KEY,payload);localStorage.setItem(BACKUP_KEY,payload);$('storageStatus').textContent=window.CloudProjects?.user?'Guardado local · sincronizando…':'Guardado en este dispositivo';}catch{$('storageStatus').textContent='Sin guardar · exporta una copia';notify('No se pudo guardar en este navegador. Exporta una copia del proyecto.');}}
  function sync(){if(!ready)return;$('projectName').textContent=active.name;const s=serializeProjectState();$('materialCount').textContent=s.components.length+s.tubingConnections.length;$('canvasStats').textContent=`${s.components.length} piezas · ${s.tubingConnections.length} tubos`;const rows=WorkshopData.materials(s,componentLibrary);$('materialsBody').innerHTML=rows.map(r=>`<tr><td>${r.image?`<img src="${escapeHtml(r.image)}" alt="">`:''}${escapeHtml(r.name)}</td><td>${escapeHtml(r.reference)}</td><td>${escapeHtml(r.detail)}</td><td>${r.quantity}</td></tr>`).join('')||'<tr><td colspan="4">Tu conjunto está vacío. Añade piezas desde la biblioteca.</td></tr>';$('downloadCsvBtn').disabled=!rows.length;
 
  }
@@ -65,7 +65,7 @@
  function scheduleCloudSave(){if(!window.CloudProjects?.user||!ready)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>saveActiveCloud(false),1200);}
  async function syncFromCloud(showMessage=false){
   if(!window.CloudProjects?.user)return;
-  try{const remote=await CloudProjects.list();const map=new Map(projects.map(p=>[p.id,p]));for(const rp of remote){try{const valid=WorkshopData.validate(rp,componentLibrary);const local=map.get(valid.id);if(!local||new Date(valid.updated||0)>=new Date(local.updated||0))map.set(valid.id,valid);}catch{}}
+  try{const remote=await CloudProjects.list();const map=new Map(projects.map(p=>[p.id,p]));for(const rp of remote){try{const valid=WorkshopData.validate(rp,componentLibrary);const local=map.get(valid.id);if(!local){map.set(valid.id,valid);}else{const localCount=local.state?.components?.length||0,remoteCount=valid.state?.components?.length||0;const remoteNewer=new Date(valid.updated||0)>new Date(local.updated||0);if(!(localCount>0&&remoteCount===0)&&remoteNewer)map.set(valid.id,valid);}}catch{}}
    projects=[...map.values()].sort((a,b)=>new Date(b.updated||0)-new Date(a.updated||0));
    try{localStorage.setItem(KEY,JSON.stringify({active:active?.id,projects}));}catch{}
    if(showMessage)notify('Proyectos sincronizados.');
@@ -77,9 +77,9 @@
   catch(err){console.error(err);notify(err.message||'No se pudo iniciar sesión.');}
  }
  function updateCloudUI(){const u=window.CloudProjects?.user;$('accountBtn').textContent=u?'☁ '+(u.email?.split('@')[0]||'Cuenta'):'☁ Cuenta';if(u)$('storageStatus').textContent='☁ Sincronización activa';}
- window.addEventListener('pagehide',persist);window.addEventListener('storage',e=>{if(e.key===KEY){storageBlocked=true;$('storageStatus').textContent='Cambios en otra pestaña · exporta tu copia';notify('Otro taller modificó los proyectos guardados. Exporta tu trabajo antes de recargar.');}});
+ window.addEventListener('pagehide',persist);window.addEventListener('beforeunload',persist);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')persist();});window.addEventListener('storage',e=>{if(e.key===KEY&&ready){$('storageStatus').textContent='Cambios detectados en otra pestaña · tu copia local sigue protegida';}});
  try{
-  const saved=JSON.parse(localStorage.getItem(KEY)||'null');
+  const saved=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(BACKUP_KEY)||'null');
 
   if(saved){
    if(!Array.isArray(saved.projects)||saved.projects.length>100)throw Error();

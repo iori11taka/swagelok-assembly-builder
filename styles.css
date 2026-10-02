@@ -1589,3 +1589,7 @@ body.tube-route-dragging * {
   width: 100%;
   margin-top: 10px;
 }
+
+/* Technical data: one field per row */
+.technical-data-row-single { grid-template-columns: minmax(0,1fr) auto !important; }
+.technical-data-row-single .technical-value { width:100%; }

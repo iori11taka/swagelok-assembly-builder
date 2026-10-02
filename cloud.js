@@ -77,6 +77,14 @@
   async function save(project) {
     if (!user) return null;
 
+    // Never let an accidental empty canvas erase a non-empty cloud project.
+    const incomingCount = project?.state?.components?.length || 0;
+    if (project?.id && incomingCount === 0) {
+      const { data: existing } = await client.from('assembly_projects').select('state').eq('id', project.id).maybeSingle();
+      const existingCount = existing?.state?.components?.length || 0;
+      if (existingCount > 0) throw new Error('Protección de guardado: se evitó sobrescribir un diseño con un estado vacío.');
+    }
+
     const row = {
       id: project.id,
       user_id: user.id,

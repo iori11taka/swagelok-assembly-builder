@@ -5470,19 +5470,12 @@ function renderPropertiesPanel() {
 
     const technicalRowsHtml = technicalData.length
       ? technicalData.map((item, index) => `
-          <div class="technical-data-row" data-technical-row="${index}">
-            <input
-              class="property-text-input technical-key"
-              type="text"
-              value="${escapeHtml(item.label || "")}"
-              placeholder="Dato, ej. Material"
-              data-technical-key="${index}"
-            >
+          <div class="technical-data-row technical-data-row-single" data-technical-row="${index}">
             <input
               class="property-text-input technical-value"
               type="text"
-              value="${escapeHtml(item.value || "")}"
-              placeholder="Valor"
+              value="${escapeHtml(item.value || item.label || "")}"
+              placeholder="Escribe un dato..."
               data-technical-value="${index}"
             >
             <button
@@ -5496,7 +5489,7 @@ function renderPropertiesPanel() {
         `).join("")
       : `
           <div class="technical-empty">
-            Aún no hay datos técnicos para esta pieza.
+            Aún no hay datos para esta pieza.
             Agrega únicamente la información que necesites.
           </div>
         `;
@@ -6198,7 +6191,7 @@ if (propertiesBody) {
         selectedComponent.dataset.propertiesTab = "technical";
         renderPropertiesPanel();
         const inputs = propertiesBody.querySelectorAll(".technical-data-row input");
-        if (inputs.length) inputs[inputs.length - 2]?.focus();
+        if (inputs.length) inputs[inputs.length - 1]?.focus();
         commitHistory();
         return;
       }
